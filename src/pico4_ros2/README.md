@@ -44,26 +44,27 @@ flowchart LR
 ```bash
 source /opt/ros/humble/setup.bash
 colcon build --packages-select pico4_ros2
-source install/setup.bash
 ```
 
-使用其他本地 SDK 安装包时，以 `colcon build --packages-select pico4_ros2 --cmake-args -DPICO4_SDK_DEB=/absolute/path/to/SDK.deb` 编译。
+编译只需加载 Humble；运行 ROS2 节点前按下文加载 PC 运行环境。使用其他本地 SDK 安装包时，以 `colcon build --packages-select pico4_ros2 --cmake-args -DPICO4_SDK_DEB=/absolute/path/to/SDK.deb` 编译。
 
 ## 实时启动、查看与关闭
+
+以下运行命令针对本仓库 `WA1_ws`，均从工作空间根目录执行。`native_bridge/setup_pc.bash` 加载 Humble、本工作空间和已验证的 PC Fast DDS 配置；执行它只设置当前终端环境，不会启动桥容器或机器人节点。`pico4_ros2` 的设备接入代码不依赖机器人。**每个新终端都要在启动节点前加载环境。**
 
 终端 A 启动官方 PC Service 和 ROS2 接收节点：
 
 ```bash
-source /opt/ros/humble/setup.bash
-source install/setup.bash
+export ROS_DOMAIN_ID=0
+source native_bridge/setup_pc.bash
 ros2 launch pico4_ros2 pico4.launch.py
 ```
 
-在 PICO4 的 `xrrobotics` 插件中填写 PC 的 Wi-Fi IP，连接 PC Service 并打开 **Send**。终端 B 加载同一 ROS2 工作空间后查看数据：
+在 PICO4 的 `xrrobotics` 插件中填写 PC 的 Wi-Fi IP，连接 PC Service 并打开 **Send**。终端 B 使用同一 domain 和 DDS 配置查看数据：
 
 ```bash
-source /opt/ros/humble/setup.bash
-source install/setup.bash
+export ROS_DOMAIN_ID=0
+source native_bridge/setup_pc.bash
 ros2 topic echo --once /pico4/status std_msgs/msg/String
 ros2 topic echo --once --qos-reliability best_effort /pico4/frame pico4_ros2/msg/XrFrame
 ```
@@ -80,13 +81,17 @@ ros2 topic echo --once --qos-reliability best_effort /pico4/frame pico4_ros2/msg
 
 ## 浏览器位姿查看器
 
-实时接入运行时，在另一个已加载工作空间、且 `ROS_DOMAIN_ID` 相同的终端启动；未设置时两端均使用默认 domain 0：
+实时接入运行时，在终端 C 启动查看器：
 
 ```bash
+export ROS_DOMAIN_ID=0
+source native_bridge/setup_pc.bash
 ros2 launch pico4_ros2 viewer.launch.py
 ```
 
 浏览器打开 `http://127.0.0.1:8765`。`port:=8766` 可修改端口；在查看器终端按 `Ctrl+C` 关闭。页面显示头显和双手柄的位姿、局部坐标轴、轨迹，以及左右手柄的摇杆、按键、扳机和握键状态。页面可切换头显和世界坐标系，使用鼠标旋转、缩放、平移视角，并以当前头显位置重设显示原点。
+
+若 `ros2 topic list` 能发现 `/pico4/frame`，但 `echo` 没有数据，先核对接收器、查看器和查询终端是否都在启动前加载了相同环境，并用上面带 `--qos-reliability best_effort` 的命令订阅。`topic list` 只表示发现了话题；`/pico4/status` 中的 `frames` 和 `last_frame_age_ms` 可判断接收器是否持续发布帧。改变终端环境后，需要重新启动此前已经运行的节点。
 
 查看器默认将 SDK 位姿坐标映射为显示坐标 **X 前、Y 左、Z 上**，在 [pose_viewer.yaml](config/pose_viewer.yaml) 中写作 `world = (-raw_z, -raw_x, raw_y)`。该映射已通过当前 PICO4 设备的逐轴观察核对。网页同时展示原始 XYZ 和 XYZW 数值；显示原点取首次收到的头显位置。
 
@@ -95,25 +100,26 @@ ros2 launch pico4_ros2 viewer.launch.py
 回放仓库中的合成样本时，终端 A 在 `WA1_ws` 根目录执行：
 
 ```bash
-source /opt/ros/humble/setup.bash
-source install/setup.bash
-ROS_DOMAIN_ID=85 ros2 launch pico4_ros2 replay.launch.py \
+export ROS_DOMAIN_ID=85
+source native_bridge/setup_pc.bash
+ros2 launch pico4_ros2 replay.launch.py \
   jsonl:="$PWD/src/pico4_ros2/test_data/sample_xr.jsonl" loop:=true rate_hz:=30
 ```
 
 终端 B 使用相同的 domain 启动查看器：
 
 ```bash
-source /opt/ros/humble/setup.bash
-source install/setup.bash
-ROS_DOMAIN_ID=85 ros2 launch pico4_ros2 viewer.launch.py
+export ROS_DOMAIN_ID=85
+source native_bridge/setup_pc.bash
+ros2 launch pico4_ros2 viewer.launch.py
 ```
 
-`sample_xr.jsonl` 使用实测 SDK 的 JSON 结构和合成位姿值。`replay.launch.py` 的 `jsonl`、`loop`、`rate_hz` 参数分别指定文件、循环模式和发布频率。两个终端各自按 `Ctrl+C` 结束。
+`sample_xr.jsonl` 使用实测 SDK 的 JSON 结构和合成位姿值。`replay.launch.py` 的 `jsonl`、`loop`、`rate_hz` 参数分别指定文件、循环模式和发布频率。两个终端各自按 `Ctrl+C` 结束。回到真机实时接入时，在各新终端明确设置 `ROS_DOMAIN_ID=0`；`setup_pc.bash` 会保留此前已有的 domain 值。
 
-源码自带 JSON 解析与查看器坐标映射测试：
+源码自带 JSON 解析与查看器坐标映射测试；在新终端运行时先加载 Humble：
 
 ```bash
+source /opt/ros/humble/setup.bash
 colcon test --packages-select pico4_ros2
 colcon test-result --test-result-base build/pico4_ros2 --verbose
 ```

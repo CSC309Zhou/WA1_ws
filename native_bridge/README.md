@@ -40,18 +40,37 @@ ROS2 消息和服务定义统一来自工作空间的 [`src/upperlimb`](../src/u
 
 ## 编译
 
-以下命令均在 `WA1_ws` 根目录运行。先用具有 `read:packages` 权限的 GitHub PAT classic 登录 GHCR，再构建供 PC ROS2 节点使用的接口包和桥镜像：
+以下命令均在 `WA1_ws` 根目录运行。先加载 Humble，编译 PC 使用的 ROS2 接口包：
 
 ```bash
-docker login ghcr.io -u YOUR_GITHUB_USERNAME
 source /opt/ros/humble/setup.bash
 colcon build --packages-select upperlimb
+```
+
+GHCR 登录使用有镜像读取权限的 GitHub 账号；在 `Password:` 提示输入具有 `read:packages` 权限的 PAT classic，具体流程见[工作空间 README](../README.md)。下面的 Docker 登录与桥镜像构建均无需 ROS2 `source`：
+
+```bash
+docker login ghcr.io
 python3 native_bridge/bridge.py build
 ```
 
 `build --base-image 镜像引用` 可选择另一份基础镜像；也可设置 `WA1_BASE_IMAGE` 环境变量。Docker 构建上下文为 `WA1_ws` 根目录，镜像内的 ROS1 和 ROS2 接口共用 `src/upperlimb` 的消息字段。
 
+## 有线网络检查
+
+启动桥前，在运行桥的 PC 上检查实际有线地址和路由：
+
+```bash
+ip -br address
+ip route get 192.168.217.1
+ip route get 192.168.217.66
+```
+
+路由输出中的 `dev` 应是连接机器人的有线网卡，`src` 应是机器人能访问的 PC 有线地址。`bridge.py start` 默认将 `ROS_IP` 设为 `192.168.217.10`；如果这台 PC 的实际地址不同，启动时用 `--pc-ip` 指定实际地址。`ROS_MASTER_URI` 默认是 `http://192.168.217.1:11311`，机器人 Pico 的默认地址为 `192.168.217.66`。PICO4 的 Wi-Fi 数据正常不代表这条有线链路正常。
+
 ## 启动、查看与关闭
+
+以下 Docker 管理命令无需加载 ROS2 环境：
 
 ```bash
 python3 native_bridge/bridge.py start
@@ -60,7 +79,7 @@ python3 native_bridge/pc_docker.py ps -a --filter name=wa1-upperlimb-bridge
 python3 native_bridge/bridge.py stop
 ```
 
-`start` 运行名为 `wa1-upperlimb-bridge` 的容器，开放上行状态和全部桥接控制端点。相同配置的容器已运行时，`start` 直接返回。`stop` 停止并移除该容器，镜像保留在本机。机器人重启后，可依次执行 `stop`、`start` 重建 ROS1 连接。
+`start` 运行名为 `wa1-upperlimb-bridge` 的容器，开放上行状态和全部桥接控制端点。相同配置的容器已运行时，`start` 直接返回，不会重建连接；`stop` 停止并移除该容器，镜像保留在本机。机器人重启或需要改变 `--pc-ip` 等容器参数后，先执行 `stop`，再执行 `start`。
 
 | 参数 | 默认值与用途 |
 |---|---|
@@ -76,22 +95,23 @@ python3 native_bridge/bridge.py stop
 
 ## 查看 ROS2 数据
 
-每个 PC ROS2 客户端终端加载环境：
+在每个运行 ROS2 CLI 或 Python 客户端的新终端，先设真机 domain 0，再加载工作空间及 PC DDS 环境。`setup_pc.bash` 保留事先设置的 `ROS_DOMAIN_ID`；在已启动的进程之后执行 `source` 不会改变该进程的环境。
 
 ```bash
+export ROS_DOMAIN_ID=0
 source native_bridge/setup_pc.bash
 ros2 topic list -t
 ros2 service list -t
 ros2 topic echo --once /upperlimb/bridge/status std_msgs/msg/String
-ros2 topic echo --once /upperlimb/joint_states sensor_msgs/msg/JointState
-ros2 topic echo --once /upperlimb/tcp_pose/left upperlimb/msg/Pose
+ros2 topic echo --once --qos-reliability best_effort /upperlimb/joint_states sensor_msgs/msg/JointState
+ros2 topic echo --once --qos-reliability best_effort /upperlimb/tcp_pose/left upperlimb/msg/Pose
 ros2 topic echo --once /tf tf2_msgs/msg/TFMessage
 ros2 topic echo --once /tf_static tf2_msgs/msg/TFMessage --qos-durability transient_local
 ```
 
 `/upperlimb/bridge/status` 以 JSON 提供 `feedback_ready`、`stream_fault`、`state_count`、`sent`、`dropped` 和 ROS1 命令连接数。19 轴状态约以 200 Hz 更新；旋转关节以弧度表示，`Lifting_Z` 以米表示。PC 客户端按 `JointState.name` 查找关节。TCP 位姿使用位置与四元数；位置坐标基于机器人 BASE。
 
-`setup_pc.bash` 加载工作区消息定义，设置 Fast DDS 回环传输和 `rmw_fastrtps_cpp`；`ROS_DOMAIN_ID` 未预设时取 0。PC 客户端的 domain 与桥启动时的 `--domain` 相同。`topic list` 查看话题发现信息，`topic echo` 在当前终端建立订阅并接收消息。日常命令直接使用 ROS2 CLI；切换 ROS2 环境后需要即时重新发现话题时，可加 `--no-daemon`。
+`setup_pc.bash` 加载工作区消息定义，设置 Fast DDS 回环传输和 `rmw_fastrtps_cpp`。PC 客户端的 domain 与桥启动时的 `--domain` 相同；`topic list` 只查看话题发现信息，`topic echo` 才在当前终端建立订阅并接收消息。高频状态话题采用 BestEffort，因此上面的 `echo` 显式选择相同可靠性。切换 ROS2 环境后需要即时重新发现话题时，可加 `--no-daemon`。
 
 ## 主要接口
 
@@ -114,7 +134,7 @@ ros2 topic echo --once /tf_static tf2_msgs/msg/TFMessage --qos-durability transi
 python3 native_bridge/tests/run_mock_test.py --seconds 3
 ```
 
-该脚本自动运行 PC 回环 ROS1 模拟器和桥，测试 200 Hz 状态流、消息转换、命令端点、服务以及流看门狗，结果保存在 `native_bridge/results/`。`tests/mock_ros1.py` 和 `tests/ros2_probe.py` 由这条入口自动调用。
+该脚本自动运行 PC 回环 ROS1 模拟器和桥，测试 200 Hz 状态流、消息转换、命令端点、服务以及流看门狗，结果保存在 `native_bridge/results/`。`tests/mock_ros1.py` 和 `tests/ros2_probe.py` 由这条入口自动调用；入口脚本为其 ROS2 子进程加载 domain 83 和运行环境，宿主终端无需手动 `source`。
 
 真机测试先在终端 A 启动桥：
 
@@ -125,6 +145,7 @@ python3 native_bridge/bridge.py start
 终端 B 加载 PC ROS2 环境：
 
 ```bash
+export ROS_DOMAIN_ID=0
 source native_bridge/setup_pc.bash
 ```
 

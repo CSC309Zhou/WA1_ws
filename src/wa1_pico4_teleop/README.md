@@ -70,40 +70,41 @@ colcon build --packages-up-to wa1_pico4_teleop
 
 ## 启动、查看与关闭
 
-桥、PICO4 接收器和遥操作节点使用同一个 ROS2 domain。真机流程使用 domain 0；在每个终端先进入 `WA1_ws` 根目录并加载环境：
+桥、PICO4 接收器和遥操作节点使用同一个 ROS2 domain。真机流程使用 domain 0；以下每个终端都从 `WA1_ws` 根目录运行。`source` 只影响执行它的终端，须在启动对应 ROS2 节点前完成。`native_bridge/setup_pc.bash` 已包含 Humble、工作空间和 PC DDS 配置，无需另行加载 `install/setup.bash`。
 
-```bash
-export ROS_DOMAIN_ID=0
-source native_bridge/setup_pc.bash
-```
-
-终端 A 启动已构建的桥容器：
+终端 A 先按[桥接说明](../../native_bridge/README.md)核对机器人有线地址和路由，再启动已构建的桥容器；Docker 管理命令无需 ROS2 `source`：
 
 ```bash
 python3 native_bridge/bridge.py start
 ```
 
-终端 B 启动 PICO4 PC Service 与 ROS2 接收器；在 PICO4 插件中填写 PC 的 WiFi IP、连接并开启 Send：
+终端 B 加载真机 ROS2 环境，启动 PICO4 PC Service 与接收器；在 PICO4 插件中填写 PC 的 Wi-Fi IP、连接并开启 Send：
 
 ```bash
+export ROS_DOMAIN_ID=0
+source native_bridge/setup_pc.bash
 ros2 launch pico4_ros2 pico4.launch.py
 ```
 
-终端 C 启动完整双臂遥操作：
+终端 C 独立加载相同环境，启动完整双臂遥操作：
 
 ```bash
+export ROS_DOMAIN_ID=0
+source native_bridge/setup_pc.bash
 ros2 launch wa1_pico4_teleop teleop.launch.py
 ```
 
 这条命令默认创建双臂 ServoL 发布者及 MoveJ、伺服配置、停止和桥故障复位客户端。满足前述条件后会自动发送一次初始位 MoveJ；到位后按 A 解锁，分别握住左右握键操作，长按右 B 返回初始位。平移比例可在启动时选择，例如 `ros2 launch wa1_pico4_teleop teleop.launch.py translation_scale:=0.8`。
 
-终端 D 查看状态：
+终端 D 独立加载相同环境，查看状态：
 
 ```bash
+export ROS_DOMAIN_ID=0
+source native_bridge/setup_pc.bash
 ros2 run wa1_pico4_teleop teleop_monitor
 ```
 
-监视器显示 PICO4 帧龄、A/B 与握键状态、`initial_done`、`unlocked`、`control_block`、机器人模式和桥状态。只看位姿映射时，在终端 C 用 `ros2 launch wa1_pico4_teleop teleop.launch.py enable_control:=false` 启动预览模式；此模式不创建运动指令发布者或控制服务客户端。另一个终端可运行 `ros2 run wa1_pico4_teleop preview_direction_check --side left`，也可将 `left` 改为 `right`。
+监视器显示 PICO4 帧龄、A/B 与握键状态、`initial_done`、`unlocked`、`control_block`、机器人模式和桥状态。只看位姿映射时，在已加载真机 ROS2 环境的终端 C 用 `ros2 launch wa1_pico4_teleop teleop.launch.py enable_control:=false` 启动预览模式；此模式不创建运动指令发布者或控制服务客户端。另一个已加载相同环境的终端可运行 `ros2 run wa1_pico4_teleop preview_direction_check --side left`，也可将 `left` 改为 `right`。
 
 结束时先松开双握键，在终端 C、B 依次按 `Ctrl+C`，然后在终端 A 执行 `python3 native_bridge/bridge.py stop`。
 
@@ -123,9 +124,10 @@ ros2 run wa1_pico4_teleop teleop_monitor
 
 ## 本机测试
 
-位姿数学测试验证固定坐标映射、平移比例、旋转变换和 4 档速度与加速度限幅：
+位姿数学测试验证固定坐标映射、平移比例、旋转变换和 4 档速度与加速度限幅；在新终端运行时先加载 Humble：
 
 ```bash
+source /opt/ros/humble/setup.bash
 colcon test --packages-select wa1_pico4_teleop
 colcon test-result --test-result-base build/wa1_pico4_teleop --verbose
 ```
