@@ -1,0 +1,21 @@
+<launch>
+
+    <arg name="robot_name" default="$(optenv ROBOT_NAME zj_humanoid)" doc="Robot namespace, must match the joint_states publisher"/>
+
+    <!-- 机器人配置 -->
+    <arg name="config" default="$(find wa1_description)/config/options.yaml"/>
+    <arg name="robot_type" default="$(optenv ROBOT_TYPE WA1-S)"/>
+
+
+    <!-- TF发布 -->
+    <group ns="$(arg robot_name)">
+        <param name="robot_description" command="
+            $(find xacro)/xacro
+            $(find wa1_description)/urdf/assembly.xacro config:=$(arg config) robot_type:=$(arg robot_type)
+        "/>
+        <node pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" name="joint_state_publisher_gui"/>
+        <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen"/>
+        <node name="rviz" pkg="rviz" type="rviz" />
+    </group>
+
+</launch>

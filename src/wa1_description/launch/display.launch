@@ -1,0 +1,24 @@
+<launch>
+  <arg
+    name="model" />
+  <param
+    name="robot_description"
+    textfile="$(find wa1_description)/urdf/WA1_400L.urdf" />
+  <node
+    name="joint_state_publisher_gui"
+    pkg="joint_state_publisher_gui"
+    type="joint_state_publisher_gui">
+    <remap from="joint_states" to="/zj_humanoid/upperlimb/joint_states" />
+  </node>
+  <node
+    name="robot_state_publisher"
+    pkg="robot_state_publisher"
+    type="robot_state_publisher"
+    output="screen">
+    <remap from="joint_states" to="/zj_humanoid/upperlimb/joint_states" />
+  </node>
+  <node
+    name="rviz"
+    pkg="rviz"
+    type="rviz" />
+</launch>

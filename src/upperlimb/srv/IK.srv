@@ -1,0 +1,8 @@
+geometry_msgs/Pose pose
+float64 q7
+---
+bool success
+string message
+int32 nums
+upperlimb/Joints[] joints
+float64[] phi

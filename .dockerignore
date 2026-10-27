@@ -1,0 +1,17 @@
+# The bridge images copy only source and Docker build inputs.
+.git
+.venv
+build
+install
+log
+src/pico4_ros2
+src/wa1_pico4_teleop
+src/wa1_description
+native_bridge/evidence
+native_bridge/results
+native_bridge/tests
+native_bridge/docs
+native_bridge/examples
+**/__pycache__
+**/results
+*.pcap

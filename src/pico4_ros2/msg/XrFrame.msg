@@ -1,0 +1,9 @@
+std_msgs/Header header
+string device_id
+int64 device_timestamp_ns
+int64 pc_receive_monotonic_ns
+int32 input
+int32 battery
+XrPose head
+XrController left_controller
+XrController right_controller

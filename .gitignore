@@ -1,0 +1,28 @@
+# Local ROS 2 workspace output
+/build/
+/install/
+/log/
+/.venv/
+
+# Python and test caches
+**/__pycache__/
+*.py[cod]
+**/.pytest_cache/
+**/.mypy_cache/
+.coverage
+htmlcov/
+
+# Generated experiment output; source fixtures remain tracked
+**/results/
+/native_bridge/results/
+*.pcap
+*.bag
+*.db3
+
+# Local secrets and editor files
+.env
+.env.*
+!.env.example
+*.swp
+*~
+.DS_Store

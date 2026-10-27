@@ -1,0 +1,59 @@
+/**:
+  ros__parameters:
+    topics_1_to_2:
+      - /zj_humanoid/upperlimb/joint_states
+      - /zj_humanoid/upperlimb/tcp_pose/left_arm
+      - /zj_humanoid/upperlimb/tcp_pose/right_arm
+      - /zj_humanoid/upperlimb/tcp_speed/dual_arm
+      - /zj_humanoid/upperlimb/uplimb_state
+      - /zj_humanoid/upperlimb/occupancy_state
+      - /zj_humanoid/upperlimb/uplimb_occupation
+      - /wa/tele/tele_TCP_L_cmd
+      - /wa/tele/tele_TCP_R_cmd
+      - /wa/tele/hand_gesture
+      - /wa/tele/active
+    topics_2_to_1:
+      - /zj_humanoid/upperlimb/servoj/left_arm
+      - /zj_humanoid/upperlimb/servoj/right_arm
+      - /zj_humanoid/upperlimb/servoj/dual_arm
+      - /zj_humanoid/upperlimb/servoj/whole_body
+      - /zj_humanoid/upperlimb/servoj/neck
+      - /zj_humanoid/upperlimb/servoj/waist
+      - /zj_humanoid/upperlimb/servoj/lifting
+      - /zj_humanoid/upperlimb/servol/left_arm
+      - /zj_humanoid/upperlimb/servol/right_arm
+      - /zj_humanoid/upperlimb/servol/dual_arm
+      - /zj_humanoid/upperlimb/speedj/left_arm
+      - /zj_humanoid/upperlimb/speedj/right_arm
+      - /zj_humanoid/upperlimb/speedj/dual_arm
+      - /zj_humanoid/upperlimb/speedj/neck
+      - /zj_humanoid/upperlimb/speedj/waist
+      - /zj_humanoid/upperlimb/speedj/lifting
+      - /zj_humanoid/upperlimb/speedl/left_arm
+      - /zj_humanoid/upperlimb/speedl/right_arm
+      - /zj_humanoid/upperlimb/speedl/dual_arm
+      - /zj_humanoid/upperlimb/uplimb_occupation
+    services_1_to_2:
+      - /zj_humanoid/upperlimb/set_servo_params
+      - /zj_humanoid/upperlimb/clear_servo_params
+      - /zj_humanoid/upperlimb/enable_speedj
+      - /zj_humanoid/upperlimb/enable_speedl
+      - /zj_humanoid/upperlimb/stop
+      - /zj_humanoid/upperlimb/unlock
+      - /zj_humanoid/upperlimb/movej/left_arm
+      - /zj_humanoid/upperlimb/movej/right_arm
+      - /zj_humanoid/upperlimb/movej/dual_arm
+      - /zj_humanoid/upperlimb/movej/whole_body
+      - /zj_humanoid/upperlimb/movej/neck
+      - /zj_humanoid/upperlimb/movej/waist
+      - /zj_humanoid/upperlimb/movej/lifting
+      - /zj_humanoid/upperlimb/movel/left_arm
+      - /zj_humanoid/upperlimb/movel/right_arm
+      - /zj_humanoid/upperlimb/movel/dual_arm
+      - /zj_humanoid/upperlimb/IK/left_arm
+      - /zj_humanoid/upperlimb/IK/right_arm
+      - /zj_humanoid/upperlimb/FK/left_arm
+      - /zj_humanoid/upperlimb/FK/right_arm
+      - /zj_humanoid/upperlimb/is_singular/left_arm
+      - /zj_humanoid/upperlimb/is_singular/right_arm
+    services_2_to_1: []

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PICO4 位姿查看器</title>
+  <link rel="stylesheet" href="/viewer.css">
+  <script src="/viewer.js" defer></script>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">PICO4 ROS 2 · 只读查看器</div>
+        <h1>手柄位姿测试</h1>
+        <p>显示坐标：X 前 · Y 左 · Z 上。原点取首次收到的头显位置。</p>
+      </div>
+      <div class="header-actions">
+        <div id="connection" class="connection waiting"><span class="dot"></span><span>等待数据</span></div>
+        <button id="recenter" type="button">以当前头显位置重设原点</button>
+      </div>
+    </header>
+
+    <section class="metrics" aria-label="数据状态">
+      <div><span class="metric-label">接收频率</span><strong id="rate">—</strong></div>
+      <div><span class="metric-label">最近帧年龄</span><strong id="age">—</strong></div>
+      <div><span class="metric-label">设备电量</span><strong id="battery">—</strong></div>
+      <div><span class="metric-label">坐标映射</span><strong id="axis-map">—</strong></div>
+    </section>
+
+    <main class="visual-layout">
+      <section class="panel spatial-panel">
+        <div class="panel-heading">
+          <div><h2>空间视图</h2><p>拖动旋转 · 滚轮缩放 · Shift＋拖动或右键拖动平移</p></div>
+          <div class="view-options" role="group" aria-label="空间视图显示选项">
+            <label class="toggle"><input id="show-head" type="checkbox" checked> 头显坐标系</label>
+            <label class="toggle"><input id="show-world" type="checkbox" checked> 世界坐标系</label>
+            <label class="toggle"><input id="show-trails" type="checkbox" checked> 轨迹</label>
+          </div>
+        </div>
+        <canvas id="spatial" aria-label="头显和双手柄的空间视图"></canvas>
+        <div class="legend">
+          <span><i class="swatch head"></i>头显</span>
+          <span><i class="swatch left"></i>左手柄</span>
+          <span><i class="swatch right"></i>右手柄</span>
+          <span><i class="swatch axis-x"></i>局部 X</span>
+          <span><i class="swatch axis-y"></i>局部 Y</span>
+          <span><i class="swatch axis-z"></i>局部 Z</span>
+        </div>
+      </section>
+      <aside class="controls" aria-label="左右手柄输入状态">
+        <section class="panel controller-panel" id="left-controls">
+          <h2><i class="swatch left"></i>左手柄输入</h2>
+          <div class="joystick-row">
+            <span>摇杆</span><div class="joystick-pad"><i></i></div><strong class="joystick-value">X — · Y —</strong>
+          </div>
+          <div class="button-grid">
+            <div class="button-state" data-input="axis_click"><span>摇杆按下</span><strong>—</strong></div>
+            <div class="button-state" data-input="primary_button"><span>主键</span><strong>—</strong></div>
+            <div class="button-state" data-input="secondary_button"><span>副键</span><strong>—</strong></div>
+            <div class="button-state" data-input="menu_button"><span>菜单键</span><strong>—</strong></div>
+          </div>
+          <div class="analog" data-input="trigger"><span>扳机</span><div class="analog-track"><div class="analog-fill"></div></div><strong>—</strong></div>
+          <div class="analog" data-input="gripper"><span>握键</span><div class="analog-track"><div class="analog-fill"></div></div><strong>—</strong></div>
+        </section>
+        <section class="panel controller-panel" id="right-controls">
+          <h2><i class="swatch right"></i>右手柄输入</h2>
+          <div class="joystick-row">
+            <span>摇杆</span><div class="joystick-pad"><i></i></div><strong class="joystick-value">X — · Y —</strong>
+          </div>
+          <div class="button-grid">
+            <div class="button-state" data-input="axis_click"><span>摇杆按下</span><strong>—</strong></div>
+            <div class="button-state" data-input="primary_button"><span>主键</span><strong>—</strong></div>
+            <div class="button-state" data-input="secondary_button"><span>副键</span><strong>—</strong></div>
+            <div class="button-state" data-input="menu_button"><span>菜单键</span><strong>—</strong></div>
+          </div>
+          <div class="analog" data-input="trigger"><span>扳机</span><div class="analog-track"><div class="analog-fill"></div></div><strong>—</strong></div>
+          <div class="analog" data-input="gripper"><span>握键</span><div class="analog-track"><div class="analog-fill"></div></div><strong>—</strong></div>
+        </section>
+      </aside>
+    </main>
+
+    <section class="readouts" aria-label="位姿数值">
+      <article class="readout" id="head-card"><h2><i class="swatch head"></i>头显</h2><div class="position">—</div><div class="quaternion">—</div><div class="extra">—</div></article>
+      <article class="readout" id="left-card"><h2><i class="swatch left"></i>左手柄</h2><div class="position">—</div><div class="quaternion">—</div><div class="extra">—</div></article>
+      <article class="readout" id="right-card"><h2><i class="swatch right"></i>右手柄</h2><div class="position">—</div><div class="quaternion">—</div><div class="extra">—</div></article>
+    </section>
+
+    <footer>订阅 <code>/pico4/frame</code>。显示原点取头显位置，坐标轴方向由查看器配置决定。</footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,23 @@
+std_msgs/Header header
+int8 cmd_num
+string cmd_name
+bool left_arm_is_singular
+bool right_arm_is_singular
+bool iddp_status
+
+byte STOPPED=0
+byte MOVEJ=1
+byte MOVEJ_PATH=2
+byte MOVEL_NULLSPACE=3
+byte MOVEL=4
+byte MOVEL_PATH=5
+byte SPEEDJ=6
+byte SPEEDL=7
+byte SPEED_STOP=8
+byte MOVECSVFILE=9
+byte MOVEFOURIER=10
+byte MOVEJ_SPLINE=11
+byte TEACH=12
+byte SERVOJ=13
+byte SERVOL=14
+byte PROTECTED=15

@@ -1,0 +1,63 @@
+<launch>
+    <!-- visualization config -->
+    <arg name="rviz"        default="true" />
+    <!-- Set nodes on debug mode -->
+    <arg name="debug"       default="true" />
+    <!-- urdf test -->
+    <arg name="test"        default="false"/>
+    <!-- raw tele -> resampled + shaped TCP poses (subscribes currentEEPose from MPC) -->
+    <!-- <arg name="tele_smooth_pose_shaper" default="true"/> -->
+    <!-- TeleTarget TCP low-pass: last = alpha*last + (1-alpha)*meas (MPCTeleTarget_node uses NodeHandle "wa") -->
+    <arg name="tele_lpf_alpha" default="0.5"/>
+
+    <arg name="urdfFile"    value="$(find ocs2_robotic_assets)/resources/wa1_mm/urdf/mm_real_jointlimit.urdf" />
+    <arg name="taskFile"    value="$(find dualarmmobile_mpc)/config/wa1_mm/task_real_tele_dev.info" /> 
+    <arg name="libFolder"   value="$(find dualarmmobile_mpc)/auto_generated/wa1_mm_real" /> 
+    <arg name="robot_type"  value="wa1" /> 
+
+
+    <!-- make the files into global parameters -->
+    <param name="simulation"  value="false" />
+    <param name="taskFile"   value="$(arg taskFile)" />
+    <param name="urdfFile"   value="$(arg urdfFile)" />
+    <param name="libFolder"  value="$(arg libFolder)" />
+    <param name="global_frame"   value="world"/>
+    <param name="robot_type"  value="$(arg robot_type)" />
+    <param name="/wa/lpf_alpha" value="$(arg tele_lpf_alpha)" />
+
+    <!-- rviz -->
+    <group if="$(arg rviz)">
+      <param name="robot_description" command="$(find xacro)/xacro --inorder $(arg urdfFile)"/>
+      <param name="use_gui" value="true"/>
+      <arg name="rvizconfig" default="$(find dualarmmobile_mpc_ros)/rviz/wa2_mm_realworld_tele.rviz"/>
+      <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="log" >
+        <remap from="/joint_states" to="/wa/joint_states"/>
+      </node>
+      <node if="$(arg test)" name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+      <node if="$(arg rviz)" name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" output="screen" />
+    </group>
+
+    <!-- 启动MPC控制节点 -->
+    <node if="$(arg debug)" pkg="dualarmmobile_mpc_ros" type="mobile_manipulator_mpc_realworld_node" name="mobile_manipulator_mpc_realworld_node" output="screen">
+        <rosparam file="$(find sdf_interface)/config/voxblox_interface/voxblox_params.yaml" command="load" />
+    </node>
+    <node unless="$(arg debug)" pkg="dualarmmobile_mpc_ros" type="mobile_manipulator_mpc_realworld_node" name="mobile_manipulator_mpc_realworld_node" output="screen">
+        <rosparam file="$(find sdf_interface)/config/voxblox_interface/voxblox_params.yaml" command="load" />
+    </node>
+
+    <node if="$(arg rviz)" pkg="mpc_target" type="MPCTeleTarget_test_node" name="MPCTeleTarget_test_node" output="screen" >
+    </node>   
+
+    <node if="$(arg debug)" pkg="mpc_target" type="MPCTeleTarget_node" name="MPCTeleTarget_node" 
+           output="screen">
+    </node>
+    <node unless="$(arg debug)" pkg="mpc_target" type="MPCTeleTarget_node" name="MPCTeleTarget_node" 
+           output="screen">
+    </node>
+
+    <!-- <node if="$(arg tele_smooth_pose_shaper)" pkg="mpc_target" type="MPCTeleSmoothPoseShaper_node"
+          name="MPCTeleSmoothPoseShaper_node" output="screen"/> -->
+
+    <node pkg="tf2_ros" type="static_transform_publisher" name="world_to_root_broadcaster" args="0 0 0 0 0 0 world root" />
+
+</launch>

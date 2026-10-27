@@ -1,0 +1,8 @@
+geometry_msgs/Pose[] left_arm_path
+geometry_msgs/Pose[] right_arm_path
+float64 time
+float64[] timestamp
+bool is_async
+---
+bool success
+string message

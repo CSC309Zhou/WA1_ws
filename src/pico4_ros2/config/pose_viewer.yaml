@@ -1,0 +1,7 @@
+pico4_pose_viewer:
+  ros__parameters:
+    port: 8765
+    display_hz: 20.0
+    # Display frame: +X forward, +Y left, +Z up.
+    # Candidate XR tracking axes: +X right, +Y up, -Z forward.
+    world_from_xr_axes: ['-z', '-x', '+y']

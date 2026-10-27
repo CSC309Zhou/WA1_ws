@@ -1,0 +1,22 @@
+wa1_pico4_teleop:
+  ros__parameters:
+    enable_control: true
+    # Official ee_delta_teleop R_XR_TO_ROOT: (x, y, z) -> (-z, -x, y).
+    pose_layout: xyz_xyzw
+    translation_scale: 1.0
+    grip_on: 0.8
+    grip_off: 0.6
+    input_timeout_ms: 100
+    feedback_timeout_ms: 250
+    publish_rate_hz: 100.0
+    # Startup MoveJ waits for fresh PICO4 A=0 (released), PC lock, and WA1 STOPPED.
+    # Operator-validated in the WA1 URDF visualization. Startup and B return
+    # use this same 14-joint target; no separate numerical zero target exists.
+    initial_left: [0.84, 0.49, 1.00, -1.96, 0.09, -0.08, 0.02]
+    initial_right: [0.84, -0.49, -1.00, -1.96, -0.09, -0.08, -0.02]
+    # No fixed completion time: these low v/acc values apply to our MoveJ.
+    movej_v: 0.3
+    movej_acc: 0.2
+    preset_tolerance_rad: 0.03
+    max_xr_step_m: 0.2
+    max_xr_step_rad: 1.0

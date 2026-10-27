@@ -1,0 +1,8 @@
+upperlimb/Joints[] path
+float64 time
+float64[] timestamp
+bool is_async
+int8 arm_type
+---
+bool success
+string message

@@ -1,0 +1,25 @@
+<launch>
+  <arg name="arm_joint_states_topic" default="/zj_humanoid/upperlimb/joint_states" />
+  <arg name="hand_joint_states_topic" default="/zj_humanoid/hand/joint_states" />
+  <arg name="urdf_joint_states_topic" default="/zj_humanoid/upperlimb/urdf_joint_states" />
+  <arg name="publish_world_tf" default="true" />
+  <arg name="tf_topic" default="/wa1_description/realtime_tf" />
+  <param name="robot_description" textfile="$(find wa1_description)/urdf/WA1_400L.urdf" />
+  <node if="$(arg publish_world_tf)" name="world_to_base" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 world BASE 100">
+    <remap from="/tf" to="$(arg tf_topic)" />
+  </node>
+  <node name="joint_state_merger" pkg="wa1_description" type="realtime_joint_state_merger.py" output="screen">
+    <param name="arm_joint_states_topic" value="$(arg arm_joint_states_topic)" />
+    <param name="hand_joint_states_topic" value="$(arg hand_joint_states_topic)" />
+    <param name="urdf_joint_states_topic" value="$(arg urdf_joint_states_topic)" />
+  </node>
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+    <remap from="joint_states" to="$(arg urdf_joint_states_topic)" />
+    <remap from="/tf" to="$(arg tf_topic)" />
+    <remap from="/tf_static" to="$(arg tf_topic)_static" />
+  </node>
+  <node name="rviz" pkg="rviz" type="rviz">
+    <remap from="/tf" to="$(arg tf_topic)" />
+    <remap from="/tf_static" to="$(arg tf_topic)_static" />
+  </node>
+</launch>

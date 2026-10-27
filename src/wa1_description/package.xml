@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='utf-8'?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>wa1_description</name>
+  <version>2.0.0</version>
+  <description>URDF description package for WA1.</description>
+  <maintainer email="todo@todo.com">zj_humanoid</maintainer>
+  <license>TODO</license>
+
+  <buildtool_depend condition="$ROS_VERSION == 1">catkin</buildtool_depend>
+  <buildtool_depend condition="$ROS_VERSION == 2">ament_cmake</buildtool_depend>
+
+  <!-- <depend>robot_state_publisher</depend> -->
+  <!-- <depend>joint_state_publisher_gui</depend> -->
+  <!-- The configurable assembly launch needs optional hand packages supplied
+       separately. The static WA1_400L.urdf and display launch do not. -->
+
+  <exec_depend condition="$ROS_VERSION == 1">rospy</exec_depend>
+  <exec_depend condition="$ROS_VERSION == 1">sensor_msgs</exec_depend>
+  <exec_depend condition="$ROS_VERSION == 1">roslaunch</exec_depend>
+  <!-- <exec_depend condition="$ROS_VERSION == 1">rviz</exec_depend> -->
+  <!-- <exec_depend condition="$ROS_VERSION == 1">gazebo</exec_depend> -->
+
+  <!-- <exec_depend condition="$ROS_VERSION == 2">rviz2</exec_depend> -->
+  <exec_depend condition="$ROS_VERSION == 2">xacro</exec_depend>
+  <exec_depend condition="$ROS_VERSION == 2">robot_state_publisher</exec_depend>
+  <exec_depend condition="$ROS_VERSION == 2">joint_state_publisher_gui</exec_depend>
+  <exec_depend condition="$ROS_VERSION == 2">rviz2</exec_depend>
+  <!-- <exec_depend condition="$ROS_VERSION == 2">gazebo_ros</exec_depend> -->
+
+  <export>
+    <metainfo>
+      <commit_id>8679f98c7b0ae08a8ecc302824884de5b27d3e1b</commit_id>
+      <commit_count>23</commit_count>
+      <branch>feat/sensors</branch>
+      <build_time>2026-10-03T23:30:37+08:00</build_time>
+    </metainfo>
+    <build_type condition="$ROS_VERSION == 1">catkin</build_type>
+    <build_type condition="$ROS_VERSION == 2">ament_cmake</build_type>
+  </export>
+</package>

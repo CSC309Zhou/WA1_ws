@@ -1,0 +1,7 @@
+geometry_msgs/Pose[2] pose
+float64 v
+float64 acc
+bool is_async
+---
+bool success
+string message

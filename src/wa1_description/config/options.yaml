@@ -1,0 +1,160 @@
+WA1-S:
+    front_lidar_mid360:
+        enable: true
+        type: mid360
+
+    front_lidar_716mini:
+        enable: true
+        type: vanji_716mini
+
+    back_lidar:
+        enable: true
+        type: vanji_716mini
+
+    head_camera:
+        enable: true
+        type: d435i_d08
+
+    chest_camera:
+        enable: false
+        type: none
+
+    abdomen_camera:
+        enable: false
+        type: none
+
+    left_camera:
+        enable: false
+        type: tbd
+
+    right_camera:
+        enable: false
+        type: tbd
+
+    chassis:
+        enable: false
+        type: none
+
+    left_force_sensor:
+        enable: true
+        type: tbd
+
+    right_force_sensor:
+        enable: true
+        type: tbd
+
+    left_end_tool:
+        enable: true
+        type: f5d6_p
+
+    right_end_tool:
+        enable: true
+        type: f5d6_p
+
+WA1-D:
+    front_lidar_mid360:
+        enable: true
+        type: mid360
+
+    front_lidar_716mini:
+        enable: true
+        type: vanji_716mini
+
+    back_lidar:
+        enable: true
+        type: vanji_716mini
+
+    head_camera:
+        enable: true
+        type: d435i_d08
+
+    chest_camera:
+        enable: true
+        type: d435i
+
+    abdomen_camera:
+        enable: false
+        type: none
+
+    left_camera:
+        enable: false
+        type: tbd
+
+    right_camera:
+        enable: false
+        type: tbd
+
+    chassis:
+        enable: false
+        type: none
+
+    left_force_sensor:
+        enable: true
+        type: tbd
+
+    right_force_sensor:
+        enable: true
+        type: tbd
+
+    left_end_tool:
+        enable: true
+        # type: f5d6_lc
+        type: f5d6_l
+
+    right_end_tool:
+        enable: true
+        # type: f5d6_lc
+        type: f5d6_l
+
+WA1-E:
+    front_lidar_mid360:
+        enable: true
+        type: mid360
+
+    front_lidar_716mini:
+        enable: true
+        type: vanji_716mini
+
+    back_lidar:
+        enable: true
+        type: vanji_716mini
+
+    head_camera:
+        enable: true
+        type: d435i_d08
+
+    chest_camera:
+        enable: true
+        type: d435i
+
+    abdomen_camera:
+        enable: false
+        type: none
+
+    left_camera:
+        enable: false
+        type: tbd
+
+    right_camera:
+        enable: false
+        type: tbd
+
+    chassis:
+        enable: false
+        type: none
+
+    left_force_sensor:
+        enable: true
+        type: tbd
+
+    right_force_sensor:
+        enable: true
+        type: tbd
+
+    left_end_tool:
+        enable: true
+        type: f5d6_p
+
+    right_end_tool:
+        enable: true
+        type: f5d6_p

@@ -1,0 +1,64 @@
+# HISTORICAL ONLY: unverified recipe with obsolete COPY paths and unpinned inputs.
+# Do not use this to recreate the frozen base image for a public release.
+FROM ubuntu:22.04
+
+RUN sed -i \
+    -e 's|http://archive.ubuntu.com/ubuntu|http://mirrors.tuna.tsinghua.edu.cn/ubuntu|g' \
+    -e 's|http://security.ubuntu.com/ubuntu|http://mirrors.tuna.tsinghua.edu.cn/ubuntu|g' \
+    /etc/apt/sources.list
+
+COPY native_bridge/base_image/ros.key /usr/share/keyrings/ros-archive-keyring.gpg
+RUN echo "deb [signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://mirrors.aliyun.com/ros2/ubuntu jammy main" > /etc/apt/sources.list.d/ros2.list
+
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    build-essential \
+    cmake \
+    git \
+    python3-pip \
+    python3-rosdep \
+    python3-colcon-common-extensions \
+    ros-humble-ros-base \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN python3 -m pip install --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple rosinstall-generator vcstool
+
+ENV ROS1_WS=/ros1_ws
+
+RUN mkdir -p $ROS1_WS/src && cd $ROS1_WS \
+    && rosinstall_generator ros_comm common_msgs --rosdistro noetic --deps --tar > noetic.rosinstall \
+    && vcs import --input noetic.rosinstall src
+
+RUN set -e \
+    && apt-get update \
+    && mkdir -p /etc/ros/rosdep/sources.list.d \
+    && curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/sources.list.d/20-default.list \
+       -o /etc/ros/rosdep/sources.list.d/20-default.list \
+    && sed -i 's#https://raw.githubusercontent.com#https://ghfast.top/https://raw.githubusercontent.com#g' \
+       /etc/ros/rosdep/sources.list.d/20-default.list \
+    && rosdep update --include-eol-distros \
+    && rosdep install --from-paths $ROS1_WS/src --ignore-src -y --rosdistro noetic
+
+RUN cd $ROS1_WS && ./src/catkin/bin/catkin_make_isolated --install \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCATKIN_ENABLE_TESTING=OFF \
+    -DROSCONSOLE_BACKEND=print
+
+COPY native_bridge/base_image/ros1/upperlimb /upperlimb_ws/src/upperlimb
+RUN /bin/bash -lc "source $ROS1_WS/install_isolated/setup.bash && cd /upperlimb_ws && catkin_make -DCMAKE_BUILD_TYPE=Release"
+
+COPY src/upperlimb /bridge_ws/src/upperlimb
+RUN cd /bridge_ws && git clone --depth 1 https://github.com/ros2/ros1_bridge.git src/ros1_bridge
+
+RUN apt-get update && apt-get install -y --no-install-recommends ros-humble-rosidl-default-generators && rm -rf /var/lib/apt/lists/*
+RUN : > /opt/ros/humble/share/rosidl_generator_rs/cmake/rosidl_generator_rs-extras.cmake
+
+RUN /bin/bash -lc "export MAKEFLAGS='-j4 -l4' && source /opt/ros/humble/setup.bash && source $ROS1_WS/install_isolated/setup.bash && cd /bridge_ws \
+    && colcon build --parallel-workers 2 --cmake-args -DCMAKE_BUILD_TYPE=Release"
+
+COPY native_bridge/base_image/params/upperlimb_bridge.yaml /params/upperlimb_bridge.yaml
+COPY native_bridge/base_image/entrypoint_humble.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]

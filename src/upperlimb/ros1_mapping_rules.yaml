@@ -1,0 +1,4 @@
+# upperlimb has neither the _msgs nor _interfaces suffix required by automatic
+# package matching. Explicitly map the robot's package without renaming its API.
+- ros1_package_name: upperlimb
+  ros2_package_name: upperlimb

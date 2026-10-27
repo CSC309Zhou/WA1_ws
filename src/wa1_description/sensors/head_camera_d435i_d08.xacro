@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:macro name="head_camera_d435i_d08" params="parent:=HEAD xyz:='0.0651401529140153 0 0.112439207885702' rpy:='0 0.261799387799031 0'">
+        <xacro:sensor_d435i parent="${parent}" name="head_camera" use_nominal_extrinsics="true">
+            <origin xyz="${xyz}" rpy="${rpy}" />
+        </xacro:sensor_d435i>
+    </xacro:macro>
+</robot>
