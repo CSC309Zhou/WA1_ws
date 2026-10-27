@@ -36,13 +36,14 @@ flowchart LR
 | [setup_pc.bash](setup_pc.bash) | 为 PC 上的 ROS2 客户端加载工作区接口与 DDS 配置。 |
 | [tests](tests/) | PC 模拟回归与各控制接口的验收脚本。 |
 
-ROS2 消息和服务定义统一来自工作空间的 [`src/upperlimb`](../src/upperlimb)。`native_bridge/COLCON_IGNORE` 将双 ROS 构建留在容器内。当前本机基础镜像为 `wa1_ros1_bridge_humble:latest`；增量构建产物为 `wa1-upperlimb-bridge:humble`。基础镜像的结构和发布信息见 [基础镜像说明](docs/BASE_IMAGE.md)。
+ROS2 消息和服务定义统一来自工作空间的 [`src/upperlimb`](../src/upperlimb)。`native_bridge/COLCON_IGNORE` 将双 ROS 构建留在容器内。默认基础镜像固定到私有 GHCR 的 `v1.0.0-amd64` 版本 digest；增量构建产物为 `wa1-upperlimb-bridge:humble`。镜像地址与内容见 [基础镜像说明](docs/BASE_IMAGE.md)。
 
 ## 编译
 
-以下命令均在 `WA1_ws` 根目录运行。先构建供 PC ROS2 节点使用的接口包，再增量构建桥镜像：
+以下命令均在 `WA1_ws` 根目录运行。先用具有 `read:packages` 权限的 GitHub PAT classic 登录 GHCR，再构建供 PC ROS2 节点使用的接口包和桥镜像：
 
 ```bash
+docker login ghcr.io -u YOUR_GITHUB_USERNAME
 source /opt/ros/humble/setup.bash
 colcon build --packages-select upperlimb
 python3 native_bridge/bridge.py build

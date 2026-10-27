@@ -35,6 +35,8 @@ flowchart LR
 
 当前官方安装包是 `vendor/XRoboToolkit-PC-Service_1.0.0.0_amd64.deb`，版本 `1.0.0.0`，SHA-256 为 `0904d3936f1da6187b86957ac85c69204672946cc56bd96a49316f36abd7951a`，适用于 x86_64 Linux。CMake 在构建时用 `dpkg-deb` 解包并安装运行文件；`xr_receiver` 通过 `dlopen` 加载其中的 SDK 库。
 
+安装包由 Git LFS 跟踪。克隆仓库前安装 Git LFS；克隆后在工作空间根目录运行 `git lfs pull`，再构建本包。
+
 ## 编译
 
 以下命令均在 `WA1_ws` 根目录执行。PC 环境使用 Ubuntu 22.04、ROS2 Humble、C++17、`libjsoncpp-dev`、`pkg-config` 和 `dpkg-deb`：

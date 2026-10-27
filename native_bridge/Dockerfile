@@ -1,6 +1,5 @@
-# Local fallback until the frozen base image is published. Release builds pin
-# BASE_IMAGE to the registry digest documented in docs/BASE_IMAGE.md.
-ARG BASE_IMAGE=wa1_ros1_bridge_humble:latest
+# Frozen linux/amd64 Noetic + Humble foundation published in GHCR.
+ARG BASE_IMAGE=ghcr.io/csc309zhou/wa1-ros1-humble-base@sha256:cc808811ffd85e3b0f431a345e395394ab8bdefb079fd1a31737f7746f6c7963
 FROM ${BASE_IMAGE}
 SHELL ["/bin/bash", "-c"]
 ENV CMAKE_BUILD_PARALLEL_LEVEL=2 MAKEFLAGS=-j2

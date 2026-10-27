@@ -11,7 +11,8 @@ HERE = Path(__file__).resolve().parent
 WS = HERE.parent
 DOCKER = [sys.executable, str(HERE / 'pc_docker.py')]
 IMAGE = 'wa1-upperlimb-bridge:humble'
-LOCAL_BASE_IMAGE = 'wa1_ros1_bridge_humble:latest'
+DEFAULT_BASE_IMAGE = ('ghcr.io/csc309zhou/wa1-ros1-humble-base@'
+                      'sha256:cc808811ffd85e3b0f431a345e395394ab8bdefb079fd1a31737f7746f6c7963')
 
 
 def inspect_container(name):
@@ -24,7 +25,7 @@ def inspect_container(name):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument('action', choices=['build', 'start', 'stop', 'logs'])
-    p.add_argument('--base-image', default=os.environ.get('WA1_BASE_IMAGE', LOCAL_BASE_IMAGE),
+    p.add_argument('--base-image', default=os.environ.get('WA1_BASE_IMAGE', DEFAULT_BASE_IMAGE),
                    help='Base image for build; use a registry digest for release builds')
     p.add_argument('--pc-ip', default=os.environ.get('WA1_PC_IP', '192.168.217.10'),
                    help='PC address reachable by the robot ROS1 nodes')
