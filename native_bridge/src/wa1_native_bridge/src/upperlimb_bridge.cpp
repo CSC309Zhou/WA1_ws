@@ -35,6 +35,7 @@
 #include <upperlimb/msg/dual_pose.hpp>
 #include <upperlimb/msg/speed_l.hpp>
 #include <ros1_bridge/bridge.hpp>
+#include "wa1_native_bridge/hand_bridge.hpp"
 
 using Clock = std::chrono::steady_clock;
 static int64_t steady_ns() {
@@ -79,6 +80,8 @@ class Bridge {
     services.push_back({"enable_speedj","std_srvs","SetBool"});
     services.push_back({"stop","std_srvs","Trigger"});
     services.push_back({"unlock","std_srvs","Trigger"});
+    // Read-only query: Trigger.success reports whether the robot safety lock is active.
+    services.push_back({"safety_lock","std_srvs","Trigger"});
     services.push_back({"enable_speedl","std_srvs","SetBool"});
     for (const auto & side : {"left_arm", "right_arm", "dual_arm"}) {
       for (const auto & mode : {"movel", "movel_by_path", "movej_by_pose"}) {
@@ -186,11 +189,13 @@ class Bridge {
       });
     status_=data_->create_publisher<std_msgs::msg::String>(ros2_+"bridge/status",rclcpp::QoS(1).transient_local());
     timer_=data_->create_wall_timer(std::chrono::milliseconds(10),[this](){tick();});
+    hand_bridge_=std::make_unique<wa1_native_bridge::HandBridge>(ros1_node_);
     RCLCPP_INFO(data_->get_logger(),"WA1 bridge ready: lift=%s; fixed upperlimb whitelist; queue=1",
       lift_?"true":"false");
   }
   void spin() {
     ros::AsyncSpinner ros_spinner(2); ros_spinner.start();
+    hand_bridge_->start();
     rclcpp::executors::SingleThreadedExecutor service_executor;
     rclcpp::executors::SingleThreadedExecutor stop_executor;
     service_executor.add_node(service_node_);
@@ -208,6 +213,7 @@ class Bridge {
     std::thread stop_thread([&](){run_service(stop_executor);});
     rclcpp::spin(data_);
     service_executor.cancel(); stop_executor.cancel(); service_thread.join(); stop_thread.join();
+    hand_bridge_->stop();
     ros_spinner.stop(); ros::shutdown();
   }
  private:
@@ -352,6 +358,7 @@ class Bridge {
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr reset_;
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr stop_client_;
   rclcpp::TimerBase::SharedPtr timer_;
+  std::unique_ptr<wa1_native_bridge::HandBridge> hand_bridge_;
 };
 
 int main(int argc,char ** argv) {

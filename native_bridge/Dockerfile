@@ -13,10 +13,14 @@ COPY src/upperlimb/srv /wa1/ros1_interfaces/src/upperlimb/srv
 # catkin_pkg also treats COLCON_IGNORE as a package exclusion marker.
 COPY native_bridge/ros1_interfaces/tf2_msgs/CMakeLists.txt native_bridge/ros1_interfaces/tf2_msgs/package.xml /wa1/ros1_interfaces/src/tf2_msgs/
 COPY native_bridge/ros1_interfaces/tf2_msgs/msg /wa1/ros1_interfaces/src/tf2_msgs/msg
+COPY native_bridge/ros1_interfaces/hand/CMakeLists.txt native_bridge/ros1_interfaces/hand/package.xml /wa1/ros1_interfaces/src/hand/
+COPY src/hand/msg /wa1/ros1_interfaces/src/hand/msg
+COPY src/hand/srv /wa1/ros1_interfaces/src/hand/srv
 RUN source /ros1_ws/install_isolated/setup.bash && \
     cd /wa1/ros1_interfaces && catkin_make install -DCMAKE_BUILD_TYPE=Release -DCATKIN_ENABLE_TESTING=OFF
 
 COPY src/upperlimb /wa1/ros2_interfaces/src/upperlimb
+COPY src/hand /wa1/ros2_interfaces/src/hand
 RUN source /opt/ros/humble/setup.bash && cd /wa1/ros2_interfaces && \
     colcon build --executor sequential --cmake-args -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
 

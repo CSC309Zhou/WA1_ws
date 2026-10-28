@@ -1,12 +1,14 @@
 # WA1 PC ROS2 Humble 工作空间
 
-本工作空间在 Ubuntu 22.04 `x86_64` PC 上运行。它包含 WA1 上肢的 ROS1↔ROS2 桥、独立的 PICO4 数据接入和 PICO4 双臂遥操作。桥的冻结基础镜像存放在私有 GHCR；克隆源码后在本机增量构建桥镜像。机器人 Jetson 和机器人 Pico 运行原有 ROS1 系统。
+本工作空间在 Ubuntu 22.04 `x86_64` PC 上运行。它包含 WA1 上肢与灵巧手的 ROS1↔ROS2 桥、独立的 PICO4 数据接入和 PICO4 双臂遥操作。桥的冻结基础镜像存放在私有 GHCR；克隆源码后在本机增量构建桥镜像。机器人 Jetson 和机器人 Pico 运行原有 ROS1 系统。
 
 ## 目录
 
 | 路径 | 用途 |
 |---|---|
 | [`src/upperlimb`](src/upperlimb) | 桥、遥操作和其他 PC 节点共用的 WA1 ROS2 上肢消息与服务定义 |
+| [`src/hand`](src/hand) | WA1 灵巧手 ROS2 压力消息、关节与手势服务定义 |
+| [`src/wa1_robot_state`](src/wa1_robot_state) | WA1 上肢状态、安全锁查询与显式解锁命令 |
 | [`src/pico4_ros2`](src/pico4_ros2) | 与机器人无关的 PICO4 SDK 接入、消息和查看器 |
 | [`src/wa1_pico4_teleop`](src/wa1_pico4_teleop) | PICO4 到 WA1 双臂的映射和操作状态机 |
 | [`src/wa1_description`](src/wa1_description) | WA1 模型与可视化资源 |
@@ -24,9 +26,9 @@ git clone https://github.com/CSC309Zhou/WA1_ws.git
 cd WA1_ws
 git lfs pull
 source /opt/ros/humble/setup.bash
-rosdep install --from-paths src/upperlimb src/pico4_ros2 src/wa1_pico4_teleop \
+rosdep install --from-paths src/upperlimb src/hand src/wa1_robot_state src/pico4_ros2 src/wa1_pico4_teleop \
   --ignore-src --rosdistro humble -r -y
-colcon build --packages-up-to wa1_pico4_teleop
+colcon build --packages-up-to wa1_pico4_teleop wa1_robot_state hand
 ```
 
 PICO4 PC Service 安装包由 Git LFS 保存；版本与 SHA-256 见 [`pico4_ros2` 说明](src/pico4_ros2/README.md)。`wa1_description` 可按需另行构建。
@@ -87,4 +89,4 @@ python3 native_bridge/bridge.py stop
 
 在另一个终端按上面的真机运行环境命令加载 `native_bridge/setup_pc.bash`，再运行 ROS2 客户端。机器人网络地址、桥接接口和测试入口见 [`native_bridge` 说明](native_bridge/README.md)。仅在 PC 上验证桥的消息转换与控制路径，可直接运行 `python3 native_bridge/tests/run_mock_test.py --seconds 3`。
 
-PICO4 独立接入和浏览器可视化见 [`pico4_ros2` 说明](src/pico4_ros2/README.md)；完整双臂遥操作的启动顺序、按键与状态查看见 [`wa1_pico4_teleop` 说明](src/wa1_pico4_teleop/README.md)。本地实验版与目录调整的记录见 [代码整理计划](CODE_ORGANIZATION_PLAN.md)。
+PICO4 独立接入和浏览器可视化见 [`pico4_ros2` 说明](src/pico4_ros2/README.md)；完整双臂遥操作的启动顺序、按键与状态查看见 [`wa1_pico4_teleop` 说明](src/wa1_pico4_teleop/README.md)。上肢保护模式与安全锁的查询、显式解锁见 [`wa1_robot_state` 说明](src/wa1_robot_state/README.md)。本地实验版与目录调整的记录见 [代码整理计划](CODE_ORGANIZATION_PLAN.md)。

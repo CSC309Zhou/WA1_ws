@@ -65,6 +65,9 @@ def add_service(suffix, cls):
             response.success = True
         if hasattr(response, 'message'):
             response.message = 'mock:' + suffix
+        if suffix == 'safety_lock':
+            response.success = False
+            response.message = 'Currently not in safety lock state.'
         if cls is srv.FK:
             response.pose.position.x = req.joints[0] if req.joints else 0.0
             response.pose.orientation.w = 1.0
@@ -82,7 +85,8 @@ for side in ['left_arm', 'right_arm']:
     for mode, cls in [('FK',srv.FK), ('IK',srv.IK), ('is_singular',srv.IsSingular)]:
         add_service(mode+'/'+side, cls)
 for name, cls in [('set_servo_params',srv.Servo),('clear_servo_params',srv.Servo),
-                  ('enable_speedj',SetBool),('stop',Trigger),('unlock',Trigger)]:
+                  ('enable_speedj',SetBool),('stop',Trigger),('unlock',Trigger),
+                  ('safety_lock',Trigger)]:
     add_service(name, cls)
 for part in ['left_arm','right_arm','dual_arm']:
     for mode, cls in [('movel',srv.MoveL),('movel_by_path',srv.MoveLByPath),('movej_by_pose',srv.MoveJByPose)]:

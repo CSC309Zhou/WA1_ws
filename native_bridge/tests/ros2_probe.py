@@ -76,8 +76,8 @@ def main():
     if args.mock_control:
         assert statuses and statuses[-1]['feedback_ready'] and not statuses[-1]['read_only'],statuses[-1:]
         assert statuses[-1]['ros1_master_uri'].rstrip('/')=='http://127.0.0.1:11321',statuses[-1]
-        assert not any(name == '/upperlimb/safety_lock' for name, _ in node.get_service_names_and_types()), \
-            'Unverified safety_lock service must not be exposed'
+        response=call(Trigger,'/upperlimb/safety_lock',Trigger.Request())
+        assert response.success is False and 'not in safety lock' in response.message,response
         response=call(FK,'/upperlimb/FK/left_arm',FK.Request(joints=[.123]+[0.0]*6))
         assert response.success and abs(response.pose.position.x-.123)<1e-12
         response=call(Servo,'/upperlimb/set_servo_params',Servo.Request(v=.1,acc=.2,time=.01,lookahead_time=.02,gain=100,arm_type=31))
@@ -187,7 +187,8 @@ def main():
             received_matching_samples=len(delays),target_command_hz=200,
             watchdog_stop_after_stream_end_ms=(stop[0]['received_steady_ns']-end)/1e6,
             checked=['7 servoj groups including lift/whole_body','6 speedj groups and masks',
-                'Cartesian services and command receivers available by default','FK service response',
+                'Cartesian services and command receivers available by default','read-only safety_lock response',
+                'FK service response',
                 'Servo and MoveJ requests','nested MoveJByPath','fixed Pose[2]/q7[2]',
                 'invalid dimension and NaN rejection','stream timeout stop during blocked motion RPC',
                 'fault inhibits and explicit reset'])
