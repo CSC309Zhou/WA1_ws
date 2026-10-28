@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101113">
+    <title>Head Camera Viewer · WA1</title>
+    <link rel="stylesheet" href="/app.css">
+    <script defer src="/app.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-mark" aria-hidden="true"><span>W</span><span>1</span></div>
+        <div class="brand-text">
+          <div class="eyebrow">WA1 / VISION</div>
+          <h1>Head Camera Viewer</h1>
+        </div>
+        <div class="topbar-right">
+          <div class="source-tag">INTEL REALSENSE D435i</div>
+          <div class="status-pill" id="global-status" data-state="waiting">
+            <span class="status-dot"></span><span id="global-status-text">正在连接</span>
+          </div>
+        </div>
+      </header>
+
+      <main class="dashboard">
+        <section class="main-content" aria-label="相机画面">
+          <div class="section-heading">
+            <div>
+              <div class="section-index">01 / LIVE VIEW</div>
+              <h2>实时画面</h2>
+            </div>
+            <p>头部相机 · 彩色与对齐深度</p>
+          </div>
+
+          <div class="feed-grid">
+            <article class="feed-card" id="color-card">
+              <div class="feed-heading">
+                <div>
+                  <span class="feed-number">01</span>
+                  <h3>彩色图像</h3>
+                </div>
+                <span class="feed-format">RGB / JPEG</span>
+              </div>
+              <div class="feed-stage">
+                <img src="/stream/color.mjpg" alt="头部 D435i 彩色画面">
+                <div class="feed-placeholder" id="color-placeholder">
+                  <div class="placeholder-glyph" aria-hidden="true"></div>
+                  <strong>等待彩色画面</strong>
+                  <span id="color-placeholder-text">等待来自头部相机的新帧</span>
+                </div>
+                <div class="stage-corner">COLOR</div>
+              </div>
+              <div class="feed-footer">
+                <span id="color-footer-resolution">— × —</span>
+                <span class="feed-footer-right"><span class="mini-dot"></span><span id="color-footer-state">等待信号</span></span>
+              </div>
+            </article>
+
+            <article class="feed-card" id="depth-card">
+              <div class="feed-heading">
+                <div>
+                  <span class="feed-number">02</span>
+                  <h3>对齐深度</h3>
+                </div>
+                <span class="feed-format">16-BIT / DEPTH</span>
+              </div>
+              <div class="feed-stage">
+                <img src="/stream/depth.mjpg" alt="头部 D435i 对齐深度伪彩色画面">
+                <div class="feed-placeholder" id="depth-placeholder">
+                  <div class="placeholder-glyph depth-glyph" aria-hidden="true"></div>
+                  <strong>等待深度画面</strong>
+                  <span id="depth-placeholder-text">等待对齐深度的新帧</span>
+                </div>
+                <div class="stage-corner">ALIGNED DEPTH</div>
+              </div>
+              <div class="feed-footer">
+                <span id="depth-footer-resolution">— × —</span>
+                <span class="feed-footer-right"><span class="mini-dot"></span><span id="depth-footer-state">等待信号</span></span>
+              </div>
+            </article>
+          </div>
+
+          <div class="depth-key">
+            <span>深度着色</span>
+            <div class="depth-gradient" aria-hidden="true"></div>
+            <span id="depth-range-label">近 — · 远 —</span>
+            <span class="depth-key-note">无效像素显示为深灰色</span>
+          </div>
+        </section>
+
+        <aside class="sidebar" aria-label="相机状态">
+          <div class="sidebar-heading">
+            <div class="section-index">02 / CAMERA DATA</div>
+            <h2>相机信息</h2>
+          </div>
+
+          <section class="side-card link-card">
+            <div class="card-label">连接状态 <span>LINK</span></div>
+            <div class="connection-title" id="link-state">正在连接</div>
+            <div class="connection-detail" id="link-detail">等待 ROSBridge 响应</div>
+            <div class="divider"></div>
+            <div class="detail-row"><span>Jetson</span><strong id="source-address">—</strong></div>
+            <div class="detail-row"><span>数据来源</span><strong>头部 D435i</strong></div>
+          </section>
+
+          <section class="side-card">
+            <div class="card-label">彩色图像 <span>COLOR</span></div>
+            <div class="primary-metric"><strong id="color-fps">—</strong><span>FPS</span></div>
+            <div class="divider"></div>
+            <div class="detail-row"><span>分辨率</span><strong id="color-resolution">—</strong></div>
+            <div class="detail-row"><span>帧大小</span><strong id="color-size">—</strong></div>
+            <div class="detail-row"><span>最新帧</span><strong id="color-age">—</strong></div>
+          </section>
+
+          <section class="side-card">
+            <div class="card-label">对齐深度 <span>DEPTH</span></div>
+            <div class="primary-metric"><strong id="depth-fps">—</strong><span>FPS</span></div>
+            <div class="divider"></div>
+            <div class="detail-row"><span>分辨率</span><strong id="depth-resolution">—</strong></div>
+            <div class="detail-row"><span>显示尺寸</span><strong id="depth-preview-resolution">—</strong></div>
+            <div class="detail-row"><span>有效像素</span><strong id="depth-valid">—</strong></div>
+            <div class="detail-row"><span>最新帧</span><strong id="depth-age">—</strong></div>
+          </section>
+
+          <p class="sidebar-note">画面与帧率来自 PC 当前接收的数据。在启动查看器的终端按 Ctrl+C 结束本地显示。</p>
+        </aside>
+      </main>
+    </div>
+  </body>
+</html>

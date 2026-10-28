@@ -13,6 +13,7 @@
 | [`src/wa1_pico4_teleop`](src/wa1_pico4_teleop) | PICO4 到 WA1 双臂的映射和操作状态机 |
 | [`src/wa1_description`](src/wa1_description) | WA1 模型与可视化资源 |
 | [`native_bridge`](native_bridge) | ROS1↔ROS2 原生桥、增量 Dockerfile、PC Docker 管理器和验收脚本 |
+| [`head_camera_viewer`](head_camera_viewer) | PC 本地浏览器查看头部 RealSense 彩色与对齐深度图像 |
 
 `native_bridge/COLCON_IGNORE` 让宿主机纯 Humble 构建只处理 `src/` 下的软件包；桥内的 C++ 包在同时具备 ROS1 和 ROS2 的容器里构建。历史基础镜像配方保存在 `native_bridge/docs/archive/`，正式构建使用 [`native_bridge/Dockerfile`](native_bridge/Dockerfile)。
 
@@ -40,6 +41,7 @@ PICO4 PC Service 安装包由 Git LFS 保存；版本与 SHA-256 见 [`pico4_ros
 | 要运行的命令 | 该终端需要先执行 |
 |---|---|
 | `git`、`docker login`、`native_bridge/pc_docker.py`、`native_bridge/bridge.py build/start/stop/logs` | 无需加载 ROS2 环境。 |
+| `head_camera_viewer/head_camera_viewer.py` | 无需加载 ROS2 环境；使用包含 OpenCV、NumPy 和 websocket-client 的 Python 环境。 |
 | `colcon build`、`colcon test` | `source /opt/ros/humble/setup.bash`。 |
 | `native_bridge/tests/run_mock_test.py` | 无需手动加载 ROS2 环境；脚本会为其 ROS2 子进程设置模拟 domain 和运行环境。 |
 | 真机 PICO4 接收、查看器、桥接话题查询、遥操作、监视器及手动验收脚本 | 先设 `ROS_DOMAIN_ID=0`，再加载 `native_bridge/setup_pc.bash`。 |
@@ -71,7 +73,7 @@ python3 native_bridge/bridge.py build
 
 ## 运行与验证
 
-启动桥前先核对有线连接。`ip route get` 的 `dev` 应为连接机器人的有线网卡，`src` 应与桥使用的 PC 地址一致；桥默认地址为 `192.168.217.10`。机器人 Jetson 和机器人 Pico 的默认有线地址分别为 `192.168.217.1` 和 `192.168.217.66`。
+启动桥前先核对有线连接。`ip route get` 的 `dev` 应为连接机器人的有线网卡，`src` 应与桥使用的 PC 地址一致；桥默认地址为 `192.168.217.10`。当前现场 ROS1 Master 使用 `192.168.217.1`，机器人 Pico 使用 `192.168.217.66`，Jetson 的 `eno1` 实测为 `192.168.217.100`。
 
 ```bash
 ip -br address
@@ -90,3 +92,16 @@ python3 native_bridge/bridge.py stop
 在另一个终端按上面的真机运行环境命令加载 `native_bridge/setup_pc.bash`，再运行 ROS2 客户端。机器人网络地址、桥接接口和测试入口见 [`native_bridge` 说明](native_bridge/README.md)。仅在 PC 上验证桥的消息转换与控制路径，可直接运行 `python3 native_bridge/tests/run_mock_test.py --seconds 3`。
 
 PICO4 独立接入和浏览器可视化见 [`pico4_ros2` 说明](src/pico4_ros2/README.md)；完整双臂遥操作的启动顺序、按键与状态查看见 [`wa1_pico4_teleop` 说明](src/wa1_pico4_teleop/README.md)。上肢保护模式与安全锁的查询、显式解锁见 [`wa1_robot_state` 说明](src/wa1_robot_state/README.md)。本地实验版与目录调整的记录见 [代码整理计划](CODE_ORGANIZATION_PLAN.md)。
+
+## 本地查看头部相机
+
+`head_camera_viewer` 在 PC 浏览器中同时显示头部 D435i 的彩色图像和伪彩色对齐深度图；侧边栏显示各路接收帧率、分辨率、最新帧时间等信息。它直接连接 Jetson 的 ROSBridge，当前默认有线地址为 `192.168.217.100:9090`。运行前确保 PC 有线网络已连接，Jetson 的传感器与 ROSBridge 服务正在运行。查看器无需启动桥容器、编译 ROS2 软件包或加载 ROS2 环境。
+
+已有 `.venv` 时，在工作空间根目录首次安装依赖（已安装则跳过第一行），再启动查看器：
+
+```bash
+.venv/bin/python -m pip install -r head_camera_viewer/requirements.txt
+.venv/bin/python head_camera_viewer/head_camera_viewer.py
+```
+
+浏览器打开 `http://127.0.0.1:8767`；在启动终端按 `Ctrl+C` 关闭。没有 `.venv` 时的创建命令，以及修改 Jetson 地址、网页端口和深度显示范围的方法，见 [`head_camera_viewer` 详细说明](head_camera_viewer/README.md)。
