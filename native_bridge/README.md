@@ -115,6 +115,41 @@ ros2 topic echo --once /tf_static tf2_msgs/msg/TFMessage --qos-durability transi
 
 `setup_pc.bash` 加载工作区消息定义，设置 Fast DDS 回环传输和 `rmw_fastrtps_cpp`。PC 客户端的 domain 与桥启动时的 `--domain` 相同；`topic list` 只查看话题发现信息，`topic echo` 才在当前终端建立订阅并接收消息。高频状态话题采用 BestEffort，因此上面的 `echo` 显式选择相同可靠性。切换 ROS2 环境后需要即时重新发现话题时，可加 `--no-daemon`。
 
+## 故障排查：桥在运行，但本机看不到话题
+
+`bridge.py logs` 中的 `Passing message ... (showing msg only once per type)` 只在首次转换该消息类型时打印，不能用它判断此刻是否仍有数据。先在查询话题的**同一个终端**设置真机 domain 并加载 PC 环境：
+
+```bash
+cd ~/WA1/WA1_ws
+export ROS_DOMAIN_ID=0
+source native_bridge/setup_pc.bash
+ros2 topic list --no-daemon -t
+ros2 topic list -t
+```
+
+`setup_pc.bash` 保留已有的 `ROS_DOMAIN_ID`，所以先前为 PICO4 回放设置的 domain 85 不会因 `source` 自动变回 0。`--no-daemon` 让本次命令按当前终端环境直接发现话题；普通 `topic list` 使用已经运行的 ROS2 daemon。daemon 是独立进程，之后在终端执行 `source` 不会更新它的环境或发现结果。
+
+如果 `--no-daemon` 能看到 `/upperlimb/joint_states`，普通列表却看不到，重启**本机 ROS2 daemon** 后复查：
+
+```bash
+ros2 daemon stop
+ros2 topic list -t
+ros2 topic echo --no-daemon --once --qos-reliability best_effort \
+  /upperlimb/joint_states sensor_msgs/msg/JointState --field name
+```
+
+这次现场故障正是这种情况：`--no-daemon` 能发现约 30 个上肢与手部话题并收到关节状态，普通列表只显示系统话题；停止 daemon 后普通列表恢复。旧 daemon 为何失去发现结果尚未确定。
+
+如果两个列表都看不到桥的话题，继续检查桥容器配置、PC 有线地址与机器人 ROS1 Master 路由：
+
+```bash
+python3 native_bridge/pc_docker.py ps -a --filter name=wa1-upperlimb-bridge
+python3 native_bridge/bridge.py logs
+ip route get 192.168.217.1
+```
+
+桥默认使用 domain 0、PC 有线地址 `192.168.217.10` 和 ROS1 Master `192.168.217.1:11311`；这些值应与当前网络和查询终端一致。话题出现在列表中仅表示发现成功，是否持续传输仍需用 `topic echo` 验证。
+
 ## 主要接口
 
 | 类别 | PC ROS2 端点 | 类型与内容 |
