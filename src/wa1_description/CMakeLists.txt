@@ -1,23 +1,21 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.8)
 project(wa1_description)
 
-if("$ENV{ROS_VERSION}" STREQUAL "2")
-  find_package(ament_cmake REQUIRED)
+find_package(ament_cmake REQUIRED)
 
-  install(DIRECTORY config launch meshes sensors urdf
-    DESTINATION share/${PROJECT_NAME})
+install(PROGRAMS scripts/live_joint_states.py
+  DESTINATION lib/${PROJECT_NAME})
 
-  ament_package()
-else()
-  find_package(catkin REQUIRED)
-  catkin_package()
+install(DIRECTORY launch meshes rviz urdf
+  DESTINATION share/${PROJECT_NAME}
+  PATTERN "__pycache__" EXCLUDE
+)
 
-  foreach(dir config launch meshes sensors urdf)
-    install(DIRECTORY ${dir}/
-      DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/${dir})
-  endforeach()
-
-  catkin_install_python(PROGRAMS scripts/realtime_joint_state_merger.py
-    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-
+if(BUILD_TESTING)
+  find_package(ament_cmake_pytest REQUIRED)
+  ament_add_pytest_test(test_description_resources
+    test/test_description_resources.py
+  )
 endif()
+
+ament_package()

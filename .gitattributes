@@ -1,1 +1,2 @@
 src/pico4_ros2/vendor/*.deb filter=lfs diff=lfs merge=lfs -text
+src/wa1_description/meshes/*.STL filter=lfs diff=lfs merge=lfs -text

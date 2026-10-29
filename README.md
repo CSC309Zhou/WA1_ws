@@ -11,7 +11,7 @@
 | [`src/wa1_robot_state`](src/wa1_robot_state) | WA1 上肢状态、安全锁查询与显式解锁命令 |
 | [`src/pico4_ros2`](src/pico4_ros2) | 与机器人无关的 PICO4 SDK 接入、消息和查看器 |
 | [`src/wa1_pico4_teleop`](src/wa1_pico4_teleop) | PICO4 到 WA1 双臂的映射和操作状态机 |
-| [`src/wa1_description`](src/wa1_description) | WA1 模型与可视化资源 |
+| [`src/wa1_description`](src/wa1_description/README.md) | WA1 模型与可视化资源 |
 | [`native_bridge`](native_bridge) | ROS1↔ROS2 原生桥、增量 Dockerfile、PC Docker 管理器和验收脚本 |
 | [`head_camera_viewer`](head_camera_viewer) | PC 本地浏览器查看头部 RealSense 彩色与对齐深度图像 |
 

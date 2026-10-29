@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-    <xacro:macro name="chest_camera_d435i" params="parent:=WAIST_PITCH xyz:='0.096161 0 0.40243' rpy:='-0.00074686 0.52073 0'">
-        <xacro:sensor_d435i parent="${parent}" name="chest_camera" use_nominal_extrinsics="true">
-            <origin xyz="${xyz}" rpy="${rpy}" />
-        </xacro:sensor_d435i>
-    </xacro:macro>
-</robot>

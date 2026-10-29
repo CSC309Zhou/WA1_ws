@@ -1,6 +1,0 @@
-<?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-    <xacro:macro name="front_lidar_716mini" params="parent:=BASE xyz:='0.3692 0 -0.12366' rpy:='0 0 0'">
-        <xacro:vanji_716mini parent="${parent}" prefix="front_lidar_716mini" xyz="${xyz}" rpy="${rpy}"/>
-    </xacro:macro>
-</robot>
