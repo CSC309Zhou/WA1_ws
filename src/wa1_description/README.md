@@ -10,6 +10,8 @@
 | `meshes/` | URDF 使用的 STL 外观与碰撞模型 |
 | `launch/display.launch.py` | 同时启动关节 GUI、状态发布器和 RViz2 |
 | `rviz/wa1_400l.rviz` | 使用 `BASE` 固定坐标系的默认 RViz2 视图 |
+| `launch/live_display.launch.py` | 显示机器人实时关节状态与 AprilTag 0 位姿 |
+| `rviz/wa1_live_apriltag.rviz` | 实时展示专用视图，含标签坐标轴和名称 |
 
 ## 安装依赖与构建
 
@@ -62,9 +64,23 @@ ros2 launch wa1_description live_display.launch.py
 
 实时入口按 `JointState.name` 将 `/upperlimb/joint_states` 的位置映射到 URDF，旋转关节单位为弧度，升降为米。它使用 BestEffort 订阅和 PC 时间戳，收到反馈时发布完整模型关节状态；未收到反馈的关节保持零位，反馈中断后模型停留在最后姿态。本模型不含灵巧手，轮组零位也不代表实时底盘里程计。
 
+同一入口还订阅 `/perception/apriltag/tag0/pose_base`，把其中的 `wa1_upperlimb_base` 映射为模型固定帧 `BASE`，在 `/wa1_visualization/tf` 发布 `BASE → apriltag_36h11_0`，并通过 `/wa1_visualization/apriltag_markers` 显示红 X、绿 Y、蓝 Z 坐标轴和标签名。这里只改变 PC 可视化帧名；原始位姿话题及其时间戳不变。可视化 TF、Marker 与关节模型使用各自在 PC 收到消息时的时间戳。标签离开视野或头部、腰部、升降偏离标定姿态后，Jetson 会停止发布 BASE 位姿，坐标轴和标签文字在最后一帧后约 `0.3 s` 消失。
+
+在另一个已加载相同环境的终端检查标签输入及可视化输出：
+
+```bash
+source /opt/ros/humble/setup.bash
+export ROS_DOMAIN_ID=0
+source native_bridge/setup_pc.bash
+source install/local_setup.bash
+ros2 topic echo --once --qos-reliability best_effort /perception/apriltag/tag0/pose_base
+ros2 topic echo --once /wa1_visualization/apriltag_markers
+ros2 topic echo --once /wa1_visualization/tf tf2_msgs/msg/TFMessage
+```
+
 映射后的状态在 `/wa1_visualization/joint_states`，模型 TF 位于 `/wa1_visualization/tf` 和 `/wa1_visualization/tf_static`，RViz 已自动订阅对应 TF。运行时关闭手动展示入口 `display.launch.py`，避免多个 RobotModel 描述发布器同时运行。
 
-本入口只订阅机器人反馈，不发送运动命令。排查收不到数据时，先检查桥日志及 `/upperlimb/bridge/status`，再检查 `/upperlimb/joint_states` 和 `/wa1_visualization/joint_states`。
+本入口只订阅机器人反馈，不发送运动命令。排查收不到数据时，先检查桥日志及 `/upperlimb/bridge/status`，再检查 `/upperlimb/joint_states` 和 `/wa1_visualization/joint_states`。若模型正常但标签缺失，查看 `/perception/apriltag/tag0/status`、`/perception/apriltag/tag0/base_valid` 和 `/perception/apriltag/tag0/pose_base`；BASE 位姿只有在固定关节接近标定位置且标签可见时才会发布。
 
 ## 常见问题
 

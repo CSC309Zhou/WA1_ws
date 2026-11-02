@@ -11,6 +11,7 @@
   <depend>std_msgs</depend>
   <depend>std_srvs</depend>
   <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
   <depend>tf2_msgs</depend>
   <depend>upperlimb</depend>
   <export><build_type>ament_cmake</build_type></export>

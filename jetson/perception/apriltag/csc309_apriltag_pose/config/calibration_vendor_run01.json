@@ -1,0 +1,24 @@
+{
+  "source_report": "/home/naviai/csc309/perception/hand_eye/results/run01_latest.json",
+  "model": "vendor_camera_info",
+  "image_width": 1920,
+  "image_height": 1080,
+  "camera_frame": "realsense_head_color_optical_frame",
+  "distortion_model": "plumb_bob",
+  "base_frame": "wa1_upperlimb_base",
+  "camera_matrix": [1363.466064453125, 0.0, 981.69775390625, 0.0, 1363.2935791015625, 550.053955078125, 0.0, 0.0, 1.0],
+  "distortion_coefficients": [0.0, 0.0, 0.0, 0.0, 0.0],
+  "base_to_camera": {
+    "translation_m": [0.6718250842861672, 0.04704560732722033, 1.3533309321466076],
+    "quaternion_xyzw": [-0.6484926219894648, 0.6759329277095497, -0.26675624570951273, 0.2267445739994498]
+  },
+  "fixed_joints": {
+    "Lifting_Z": 0.04999999638139319,
+    "Waist_Z": 1.1984225238848012e-05,
+    "Waist_Y": 0.43601008263976837,
+    "Neck_Z": 0.0,
+    "Neck_Y": 0.26199984410586785
+  },
+  "angle_tolerance_rad": 0.002,
+  "lift_tolerance_m": 0.001
+}

@@ -119,6 +119,23 @@ class Bridge {
       uplinks_.push_back(ros1_bridge::create_bridge_from_1_to_2(
         ros1_node_, data_, s.type1, ros1_+s.from, 1, s.type2, ros2_+s.to, qos));
     }
+    // Jetson perception publishes small results locally. Forward them to PC
+    // without carrying camera images or commanding any robot component.
+    const std::vector<Uplink> perception = {
+      {"/csc309/apriltag/tag0/pose_camera", "/perception/apriltag/tag0/pose_camera",
+        "geometry_msgs/PoseStamped", "geometry_msgs/msg/PoseStamped"},
+      {"/csc309/apriltag/tag0/pose_base", "/perception/apriltag/tag0/pose_base",
+        "geometry_msgs/PoseStamped", "geometry_msgs/msg/PoseStamped"},
+      {"/csc309/apriltag/tag0/detected", "/perception/apriltag/tag0/detected",
+        "std_msgs/Bool", "std_msgs/msg/Bool"},
+      {"/csc309/apriltag/tag0/base_valid", "/perception/apriltag/tag0/base_valid",
+        "std_msgs/Bool", "std_msgs/msg/Bool"},
+      {"/csc309/apriltag/tag0/status", "/perception/apriltag/tag0/status",
+        "std_msgs/String", "std_msgs/msg/String"}};
+    for (const auto & s : perception) {
+      uplinks_.push_back(ros1_bridge::create_bridge_from_1_to_2(
+        ros1_node_, data_, s.type1, s.from, 1, s.type2, s.to, qos));
+    }
     // /tf and /tf_static also carry navigation transforms. Keep every message
     // from the robot's upper-limb TF node, and exclude the other ROS1 publishers.
     tf_pub_ = data_->create_publisher<tf2_msgs::msg::TFMessage>(

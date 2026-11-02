@@ -1,6 +1,6 @@
 # WA1 PC ROS2 Humble 工作空间
 
-本工作空间在 Ubuntu 22.04 `x86_64` PC 上运行。它包含 WA1 上肢与灵巧手的 ROS1↔ROS2 桥、独立的 PICO4 数据接入和 PICO4 双臂遥操作。桥的冻结基础镜像存放在私有 GHCR；克隆源码后在本机增量构建桥镜像。机器人 Jetson 和机器人 Pico 运行原有 ROS1 系统。
+本工作空间主要在 Ubuntu 22.04 `x86_64` PC 上运行。它包含 WA1 上肢与灵巧手的 ROS1↔ROS2 桥、独立的 PICO4 数据接入和 PICO4 双臂遥操作；`jetson/` 另存放头部相机的本地感知代码。桥的冻结基础镜像存放在私有 GHCR；克隆源码后在本机增量构建桥镜像。机器人 Pico 运行原有 ROS1 系统。
 
 ## 目录
 
@@ -14,8 +14,9 @@
 | [`src/wa1_description`](src/wa1_description/README.md) | WA1 模型与可视化资源 |
 | [`native_bridge`](native_bridge) | ROS1↔ROS2 原生桥、增量 Dockerfile、PC Docker 管理器和验收脚本 |
 | [`head_camera_viewer`](head_camera_viewer) | PC 本地浏览器查看头部 RealSense 彩色与对齐深度图像 |
+| [`jetson/perception/apriltag`](jetson/perception/apriltag/README.md) | Jetson 本地 Tag36h11 ID 0 检测、相机与上肢 BASE 位姿发布 |
 
-`native_bridge/COLCON_IGNORE` 让宿主机纯 Humble 构建只处理 `src/` 下的软件包；桥内的 C++ 包在同时具备 ROS1 和 ROS2 的容器里构建。历史基础镜像配方保存在 `native_bridge/docs/archive/`，正式构建使用 [`native_bridge/Dockerfile`](native_bridge/Dockerfile)。
+`native_bridge/COLCON_IGNORE` 和 `jetson/COLCON_IGNORE` 让宿主机纯 Humble 构建只处理 `src/` 下的软件包；桥内的 C++ 包在同时具备 ROS1 和 ROS2 的容器里构建。Jetson 的 ROS1 感知包在 Jetson 独立容器中构建。历史基础镜像配方保存在 `native_bridge/docs/archive/`，正式构建使用 [`native_bridge/Dockerfile`](native_bridge/Dockerfile)。
 
 ## 获取源码与编译 PC 软件包
 

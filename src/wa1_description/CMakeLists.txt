@@ -3,7 +3,7 @@ project(wa1_description)
 
 find_package(ament_cmake REQUIRED)
 
-install(PROGRAMS scripts/live_joint_states.py
+install(PROGRAMS scripts/live_joint_states.py scripts/live_apriltag.py
   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY launch meshes rviz urdf

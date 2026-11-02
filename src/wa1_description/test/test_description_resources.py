@@ -140,3 +140,46 @@ def test_rviz_config_shows_robot_in_base_frame():
     ]
     assert len(robot_models) == 1
     assert robot_models[0]["Enabled"] is True
+
+
+def test_live_apriltag_axes_follow_pose_and_expire():
+    from builtin_interfaces.msg import Time
+    from geometry_msgs.msg import PoseStamped
+
+    script = PACKAGE_ROOT / "scripts" / "live_apriltag.py"
+    spec = importlib.util.spec_from_file_location("wa1_live_apriltag", script)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    pose = PoseStamped()
+    pose.header.frame_id = "wa1_upperlimb_base"
+    pose.pose.position.x = 0.4
+    pose.pose.position.y = 0.2
+    pose.pose.position.z = 0.6
+    pose.pose.orientation.z = 2 ** -0.5
+    pose.pose.orientation.w = 2 ** -0.5
+    transform, markers = module.make_visualization(pose, Time(sec=42))
+
+    assert transform.header.frame_id == "BASE"
+    assert transform.child_frame_id == "apriltag_36h11_0"
+    assert transform.header.stamp.sec == 42
+    x_axis = markers.markers[0]
+    assert abs(x_axis.points[1].x - 0.4) < 1e-9
+    assert abs(x_axis.points[1].y - 0.32) < 1e-9
+    assert len(markers.markers) == 4
+    assert all(marker.lifetime.nanosec == 300_000_000
+               for marker in markers.markers)
+
+
+def test_live_rviz_shows_apriltag_marker_array():
+    config = yaml.safe_load(
+        (PACKAGE_ROOT / "rviz" / "wa1_live_apriltag.rviz").read_text(
+            encoding="utf-8"))
+    manager = config["Visualization Manager"]
+    assert manager["Global Options"]["Fixed Frame"] == "BASE"
+    tag_displays = [display for display in manager["Displays"]
+                    if display.get("Class") == "rviz_default_plugins/MarkerArray"]
+    assert len(tag_displays) == 1
+    assert tag_displays[0]["Enabled"] is True
+    assert tag_displays[0]["Topic"]["Value"] == \
+        "/wa1_visualization/apriltag_markers"

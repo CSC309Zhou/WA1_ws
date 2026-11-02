@@ -1,0 +1,11 @@
+<launch>
+  <group ns="csc309/apriltag">
+    <node pkg="csc309_apriltag_pose" type="pose_pipeline.py" name="pose_pipeline" output="screen">
+      <rosparam command="load" file="$(find csc309_apriltag_pose)/config/detector.yaml" />
+      <param name="calibration_file" value="$(find csc309_apriltag_pose)/config/calibration_vendor_run01.json" />
+      <param name="image_topic" value="/zj_humanoid/sensor/realsense_head/color/image_raw" />
+      <param name="joint_state_topic" value="/zj_humanoid/upperlimb/joint_states" />
+      <param name="camera_info_topic" value="/zj_humanoid/sensor/realsense_head/color/camera_info" />
+    </node>
+  </group>
+</launch>

@@ -2,20 +2,21 @@
 
 ## 目的与范围
 
-`native_bridge` 让 PC 上的 ROS2 Humble 节点直接使用 WA1 原有的 ROS1 上肢与灵巧手接口。桥运行在 PC 的 Docker 容器中，连接机器人 ROS1 Master、上肢控制节点和手部节点，并在 PC 上提供 ROS2 状态话题、控制话题和服务。
+`native_bridge` 让 PC 上的 ROS2 Humble 节点直接使用 WA1 原有的 ROS1 上肢与灵巧手接口，并接收 Jetson 本地的 AprilTag 位姿结果。桥运行在 PC 的 Docker 容器中，连接机器人 ROS1 Master、上肢控制节点、手部节点和 Jetson 感知节点，并在 PC 上提供 ROS2 状态话题、控制话题和服务。
 
-桥覆盖左臂 7 轴、右臂 7 轴、颈部 2 轴、腰部 2 轴和升降 1 轴，共 19 轴；同时转发双臂 TCP 位姿、速度和上肢 TF。灵巧手另有 12 轴反馈、左右压力反馈以及关节、手势和压力标零服务。镜像、桥节点和开发测试均位于 PC。
+桥覆盖左臂 7 轴、右臂 7 轴、颈部 2 轴、腰部 2 轴和升降 1 轴，共 19 轴；同时转发双臂 TCP 位姿、速度和上肢 TF。灵巧手另有 12 轴反馈、左右压力反馈以及关节、手势和压力标零服务。AprilTag 检测在 Jetson 本地执行，桥只转发小体积的位姿与状态消息。镜像、桥节点和开发测试均位于 PC。
 
 ## 数据链路与工作原理
 
 ```mermaid
 flowchart LR
   APP[PC ROS2 Humble 节点] <-->|本机 DDS| BRIDGE[PC Docker：Noetic + Humble + WA1 C++ 桥]
-  BRIDGE -.->|ROS1 注册与发现| MASTER[Jetson ROS1 Master]
+  BRIDGE -.->|ROS1 注册与发现| MASTER[机器人 ROS1 Master]
   BRIDGE <-->|有线 TCPROS 与服务| PICO[机器人 Pico 上肢与灵巧手节点]
+  BRIDGE <-->|有线 TCPROS 位姿与状态| JETSON[Jetson 本地 AprilTag 感知节点]
 ```
 
-1. 容器内的 C++ 节点从 ROS1 接收上肢与手部关节状态、手部压力、TCP 状态与 TF，转换消息类型后发布到 PC 的 ROS2 网络。上肢 TF 按机器人原有发布节点筛选。
+1. 容器内的 C++ 节点从 ROS1 接收上肢与手部关节状态、手部压力、TCP 状态、TF 和 Jetson 的 AprilTag 位姿，转换消息类型后发布到 PC 的 ROS2 网络。上肢 TF 按机器人原有发布节点筛选。
 2. PC ROS2 节点通过桥发布 ServoJ、ServoL 等流指令，或调用 MoveJ、MoveL、FK、IK 等服务；手部通过 HandJoint 和 Gesture 服务发送一次性目标。桥转换请求并转发至对应的 ROS1 端点。
 3. 状态话题使用 BestEffort、KeepLast(1)；下行流命令使用 Reliable、KeepLast(1)。桥保留机器人消息时间戳，并发布链路状态 `/upperlimb/bridge/status`。
 4. 流命令检查维度、数值、命令时间、反馈新鲜度和占用状态。已发送的流在 150 ms 内没有新有效指令时，桥设置 `stream_fault` 并调用上肢停止服务。`/upperlimb/bridge/reset_fault` 用于清除桥内的流故障锁存。
@@ -109,6 +110,8 @@ ros2 topic echo --once --qos-reliability best_effort /hand/joint_states sensor_m
 ros2 topic echo --once --qos-reliability best_effort /hand/finger_pressures/left hand/msg/PressureSensor
 ros2 topic echo --once /tf tf2_msgs/msg/TFMessage
 ros2 topic echo --once /tf_static tf2_msgs/msg/TFMessage --qos-durability transient_local
+ros2 topic echo --once --qos-reliability best_effort /perception/apriltag/tag0/status std_msgs/msg/String
+ros2 topic echo --once --qos-reliability best_effort /perception/apriltag/tag0/detected std_msgs/msg/Bool
 ```
 
 `/upperlimb/bridge/status` 以 JSON 提供 `feedback_ready`、`stream_fault`、`state_count`、`sent`、`dropped` 和 ROS1 命令连接数。19 轴状态约以 200 Hz 更新；旋转关节以弧度表示，`Lifting_Z` 以米表示。PC 客户端按 `JointState.name` 查找关节。TCP 位姿使用位置与四元数；位置坐标基于机器人 BASE。
@@ -164,8 +167,13 @@ ip route get 192.168.217.1
 | TCP 位置 | `/upperlimb/movel/{left_arm,right_arm,dual_arm}` | `upperlimb/srv/MoveL`，使用 `Pose[2]`。 |
 | TCP 伺服 | `/cmd/upperlimb/servol/{left_arm,right_arm,dual_arm}` | `upperlimb/msg/DualPose`。 |
 | 运动学 | `/upperlimb/FK/{left_arm,right_arm}`、`/upperlimb/IK/{left_arm,right_arm}` | `upperlimb/srv/FK`、`upperlimb/srv/IK`；FK 使用完整 19 轴数组。 |
+| AprilTag 相机系位姿 | `/perception/apriltag/tag0/pose_camera` | `geometry_msgs/msg/PoseStamped`；Jetson 头部彩色相机光学系下的 ID 0 位姿。 |
+| AprilTag BASE 位姿 | `/perception/apriltag/tag0/pose_base` | `geometry_msgs/msg/PoseStamped`；标定姿态下上肢 API BASE 系位姿。 |
+| AprilTag 状态 | `/perception/apriltag/tag0/{detected,base_valid,status}` | 两个 `std_msgs/msg/Bool` 与一个 `std_msgs/msg/String` JSON。 |
 
 接口还包含 SpeedJ、SpeedL、路径控制、伺服参数服务和 `is_singular` 查询。完整字段可在 PC 执行 `ros2 interface show upperlimb/srv/MoveJ`、`ros2 interface show upperlimb/srv/MoveL` 等命令查看。
+
+AprilTag ID 0 的检测、相机参数、固定关节条件和 Jetson 运行命令见 [Jetson 感知说明](../jetson/perception/apriltag/README.md)。标签未入镜时，`detected=false`；BASE 位姿只有在标签可见且颈部、腰部、升降位于标定姿态时才持续发布。
 
 可使用 [`wa1_robot_state`](../src/wa1_robot_state/README.md) 的 `wa1_state status`、`wa1_state lock` 查询上肢保护状态与安全锁，或在需要时显式运行 `wa1_state unlock`。机器人安全锁与桥的 `stream_fault` 是两个独立状态。
 

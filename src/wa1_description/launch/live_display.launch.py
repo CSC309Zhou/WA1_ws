@@ -14,11 +14,14 @@ def generate_launch_description():
     return LaunchDescription([
         Node(package='wa1_description', executable='live_joint_states.py',
              namespace='wa1_visualization', parameters=parameters, output='screen'),
+        Node(package='wa1_description', executable='live_apriltag.py',
+             namespace='wa1_visualization', remappings=tf_remappings,
+             output='screen'),
         Node(package='robot_state_publisher', executable='robot_state_publisher',
              namespace='wa1_visualization', parameters=parameters,
              remappings=tf_remappings + [
                  ('robot_description', '/robot_description')], output='screen'),
         Node(package='rviz2', executable='rviz2',
-             arguments=['-d', str(share / 'rviz' / 'wa1_400l.rviz')],
+             arguments=['-d', str(share / 'rviz' / 'wa1_live_apriltag.rviz')],
              remappings=tf_remappings, output='screen'),
     ])
