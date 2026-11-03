@@ -1,4 +1,0 @@
-mujoco==3.4.0
-numpy>=1.21.5
-PyYAML>=5.4.1
-typing_extensions>=4.6
