@@ -14,9 +14,9 @@
 | [`src/wa1_description`](src/wa1_description/README.md) | WA1 模型与可视化资源 |
 | [`native_bridge`](native_bridge) | ROS1↔ROS2 原生桥、增量 Dockerfile、PC Docker 管理器和验收脚本 |
 | [`head_camera_viewer`](head_camera_viewer) | PC 本地浏览器查看头部 RealSense 彩色与对齐深度图像 |
-| [`jetson/perception/apriltag`](jetson/perception/apriltag/README.md) | Jetson 本地 Tag36h11 ID 0 检测、相机与上肢 BASE 位姿发布 |
+| [`perception/apriltag`](perception/apriltag/README.md) | 通过原生桥获取 AprilTag 位姿 |
 
-`native_bridge/COLCON_IGNORE` 和 `jetson/COLCON_IGNORE` 让宿主机纯 Humble 构建只处理 `src/` 下的软件包；桥内的 C++ 包在同时具备 ROS1 和 ROS2 的容器里构建。Jetson 的 ROS1 感知包在 Jetson 独立容器中构建。历史基础镜像配方保存在 `native_bridge/docs/archive/`，正式构建使用 [`native_bridge/Dockerfile`](native_bridge/Dockerfile)。
+`native_bridge/COLCON_IGNORE` 让宿主机纯 Humble 构建跳过桥目录；桥内的 C++ 包在同时具备 ROS1 和 ROS2 的容器里构建。`perception/` 保留 PC 端 AprilTag 位姿订阅与校验代码。历史基础镜像配方保存在 `native_bridge/docs/archive/`，正式构建使用 [`native_bridge/Dockerfile`](native_bridge/Dockerfile)。
 
 ## 获取源码与编译 PC 软件包
 

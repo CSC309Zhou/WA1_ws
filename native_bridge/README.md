@@ -173,7 +173,7 @@ ip route get 192.168.217.1
 
 接口还包含 SpeedJ、SpeedL、路径控制、伺服参数服务和 `is_singular` 查询。完整字段可在 PC 执行 `ros2 interface show upperlimb/srv/MoveJ`、`ros2 interface show upperlimb/srv/MoveL` 等命令查看。
 
-AprilTag ID 0 的检测、相机参数、固定关节条件和 Jetson 运行命令见 [Jetson 感知说明](../jetson/perception/apriltag/README.md)。标签未入镜时，`detected=false`；BASE 位姿只有在标签可见且颈部、腰部、升降位于标定姿态时才持续发布。
+AprilTag ID 0 的桥接话题、坐标系、固定关节条件和 PC 订阅校验命令见 [AprilTag 位姿获取说明](../perception/apriltag/README.md)。标签未入镜时，`detected=false`；BASE 位姿只有在标签可见且颈部、腰部、升降位于标定姿态时才持续发布。
 
 可使用 [`wa1_robot_state`](../src/wa1_robot_state/README.md) 的 `wa1_state status`、`wa1_state lock` 查询上肢保护状态与安全锁，或在需要时显式运行 `wa1_state unlock`。机器人安全锁与桥的 `stream_fault` 是两个独立状态。
 

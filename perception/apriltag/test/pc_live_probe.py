@@ -17,7 +17,7 @@ from std_msgs.msg import Bool, String
 
 
 CALIBRATION = (Path(__file__).resolve().parents[1] /
-               'csc309_apriltag_pose/config/calibration_vendor_run01.json')
+               'config/calibration_vendor_run01.json')
 
 
 def quaternion(pose):
