@@ -1,0 +1,271 @@
+<?xml version="1.0" ?>
+<mujoco model="WA1_400L">
+  <compiler angle="radian" meshdir="meshes/"/>
+  <default>
+    <joint armature="0.005" damping="0.01" frictionloss="0.01"/>
+    <default class="visual">
+      <geom contype="0" conaffinity="0" group="2" mass="0" density="0"/>
+    </default>
+    <default class="collision">
+      <geom contype="2" conaffinity="1" group="3" mass="0" density="0" friction="1 0.005 0.0001" condim="4"/>
+    </default>
+  </default>
+  <asset>
+    <mesh name="BASE" file="BASE.STL"/>
+    <mesh name="BODY" file="BODY.STL"/>
+    <mesh name="WAIST_YAW" file="WAIST_YAW.STL"/>
+    <mesh name="WAIST_PITCH" file="WAIST_PITCH.STL"/>
+    <mesh name="SCAPULA_L" file="SCAPULA_L.STL"/>
+    <mesh name="SHOULDER_L" file="SHOULDER_L.STL"/>
+    <mesh name="UPPERARM_L" file="UPPERARM_L.STL"/>
+    <mesh name="FOREARM_L" file="FOREARM_L.STL"/>
+    <mesh name="WRIST_REVOLUTE_L" file="WRIST_REVOLUTE_L.STL"/>
+    <mesh name="WRIST_UPDOWN_L" file="WRIST_UPDOWN_L.STL"/>
+    <mesh name="WRIST_FLANGE_L" file="WRIST_FLANGE_L.STL"/>
+    <mesh name="TCP_L" file="TCP_L.STL"/>
+    <mesh name="SCAPULA_R" file="SCAPULA_R.STL"/>
+    <mesh name="SHOULDER_R" file="SHOULDER_R.STL"/>
+    <mesh name="UPPERARM_R" file="UPPERARM_R.STL"/>
+    <mesh name="FOREARM_R" file="FOREARM_R.STL"/>
+    <mesh name="WRIST_REVOLUTE_R" file="WRIST_REVOLUTE_R.STL"/>
+    <mesh name="WRIST_UPDOWN_R" file="WRIST_UPDOWN_R.STL"/>
+    <mesh name="WRIST_FLANGE_R" file="WRIST_FLANGE_R.STL"/>
+    <mesh name="TCP_R" file="TCP_R.STL"/>
+    <mesh name="NECK" file="NECK.STL"/>
+    <mesh name="HEAD" file="HEAD.STL"/>
+    <mesh name="LEFT_FRONT_TURN_WHEEL" file="LEFT_FRONT_TURN_WHEEL.STL"/>
+    <mesh name="LEFT_FRONT_ROLL_WHEEL" file="LEFT_FRONT_ROLL_WHEEL.STL"/>
+    <mesh name="RIGHT_FRONT_TURN_WHEEL" file="RIGHT_FRONT_TURN_WHEEL.STL"/>
+    <mesh name="RIGHT_FRONT_ROLL_WHEEL" file="RIGHT_FRONT_ROLL_WHEEL.STL"/>
+    <mesh name="LEFT_BACK_TURN_WHEEL" file="LEFT_BACK_TURN_WHEEL.STL"/>
+    <mesh name="LEFT_BACK_ROLL_WHEEL" file="LEFT_BACK_ROLL_WHEEL.STL"/>
+    <mesh name="RIGHT_BACK_TURN_WHEEL" file="RIGHT_BACK_TURN_WHEEL.STL"/>
+    <mesh name="RIGHT_BACK_ROLL_WHEEL" file="RIGHT_BACK_ROLL_WHEEL.STL"/>
+    <mesh name="LEFT_ROLL_WHEEL" file="LEFT_ROLL_WHEEL.STL"/>
+    <mesh name="RIGHT_ROLL_WHEEL" file="RIGHT_ROLL_WHEEL.STL"/>
+    <mesh name="endoscope_mesh" file="endoscope.STL"/>
+  </asset>
+  <worldbody>
+    <body name="BASE" pos="0 0 0.2966" gravcomp="1">
+      <inertial pos="0.030682 -0.000354 -0.012001" quat="0.0130868 0.766897 0.00822853 0.641584" mass="150" diaginertia="13.2916 12.9232 7.18033"/>
+      <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.792157 0.819608 0.933333 1" mesh="BASE" class="visual"/>
+      <geom type="mesh" rgba="0.792157 0.819608 0.933333 1" mesh="BASE" class="collision"/>
+      <body name="BODY" pos="0.31 0 0.492" gravcomp="1">
+        <inertial pos="-0.00569 0.001604 0.072438" quat="0.994465 0.0125533 -0.0714709 -0.0759902" mass="5.03315" diaginertia="0.01617 0.0155132 0.00776882"/>
+        <joint name="Lifting_Z" pos="0 0 0" axis="0 0 1" type="slide" range="0 0.234" actuatorfrcrange="-6780 6780" armature="0.01" damping="0.01" frictionloss="0.01"/>
+        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.792157 0.819608 0.933333 1" mesh="BODY" class="visual"/>
+        <geom type="mesh" rgba="0.792157 0.819608 0.933333 1" mesh="BODY" class="collision"/>
+        <body name="WAIST_YAW" pos="0 0 0.1561" gravcomp="1">
+          <inertial pos="-0.003603 -0.00788 0.064721" quat="0.675702 0.725966 0.0955584 -0.0852541" mass="4.30905" diaginertia="0.0100952 0.00990745 0.00752436"/>
+          <joint name="Waist_Z" pos="0 0 0" axis="0 0 1" range="-2.042 3.0892" actuatorfrcrange="-290 290" armature="0.01" damping="0.01" frictionloss="0.01"/>
+          <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.890196 0.890196 0.913725 1" mesh="WAIST_YAW" class="visual"/>
+          <geom type="mesh" rgba="0.890196 0.890196 0.913725 1" mesh="WAIST_YAW" class="collision"/>
+          <body name="WAIST_PITCH" pos="0 0 0.0744" gravcomp="1">
+            <inertial pos="-0.000269 0.000515 0.281894" quat="0.999936 0.00605765 0.00952984 -0.00100708" mass="10.6505" diaginertia="0.304488 0.227855 0.121989"/>
+            <joint name="Waist_Y" pos="0 0 0" axis="0 1 0" range="-0.5184 0.733" actuatorfrcrange="-290 290" armature="0.01" damping="0.01" frictionloss="0.01"/>
+            <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 1 1 1" mesh="WAIST_PITCH" class="visual"/>
+            <geom type="mesh" rgba="1 1 1 1" mesh="WAIST_PITCH" class="collision"/>
+            <body name="SCAPULA_L" pos="0.0074317 0.16387 0.39" quat="0.965926 0 0 -0.25882" gravcomp="1">
+              <inertial pos="-0.00040196 0.0700578 -9.26072e-05" quat="0.116849 0.694592 0.157753 0.6921" mass="1.11871" diaginertia="0.00135689 0.00119239 0.00111172"/>
+              <joint name="Shoulder_Y_L" pos="0 0 0" axis="0 1 0" range="-3.2638 1.1694" actuatorfrcrange="-57 57" armature="0.01" damping="0.01" frictionloss="0.01"/>
+              <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.341176 1 0.768627 1" mesh="SCAPULA_L" class="visual"/>
+              <geom type="mesh" rgba="0.341176 1 0.768627 1" mesh="SCAPULA_L" class="collision"/>
+              <body name="SHOULDER_L" pos="0 0.075202 0" quat="0.984807 -0.17365 0 0" gravcomp="1">
+                <inertial pos="0.021673 0.001368 -0.036388" quat="-0.0630331 0.909694 -0.154724 0.38019" mass="0.24116" diaginertia="0.000494678 0.000437833 0.000240489"/>
+                <joint name="Shoulder_X_L" pos="0 0 0" axis="1 0 0" range="-0.0035 3.0892" actuatorfrcrange="-57 57" armature="0.01" damping="0.01" frictionloss="0.01"/>
+                <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.898039 0.917647 0.929412 1" mesh="SHOULDER_L" class="visual"/>
+                <geom type="mesh" rgba="0.898039 0.917647 0.929412 1" mesh="SHOULDER_L" class="collision"/>
+                <body name="UPPERARM_L" pos="0 0 -0.0845" gravcomp="1">
+                  <inertial pos="-0.000571741 0.000196201 -0.0734512" quat="0.999962 -0.0018085 -0.00272148 0.00812032" mass="1.70224" diaginertia="0.0073432 0.00728906 0.00112974"/>
+                  <joint name="Shoulder_Z_L" pos="0 0 0" axis="0 0 1" range="-2.8885 2.8885" actuatorfrcrange="-57 57" armature="0.01" damping="0.01" frictionloss="0.01"/>
+                  <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.898039 0.917647 0.929412 1" mesh="UPPERARM_L" class="visual"/>
+                  <geom type="mesh" rgba="0.898039 0.917647 0.929412 1" mesh="UPPERARM_L" class="collision"/>
+                  <body name="FOREARM_L" pos="0 0 -0.1555" gravcomp="1">
+                    <inertial pos="-0.00293207 -0.00206216 -0.0303657" quat="0.747508 0.664098 -0.00664177 0.012739" mass="0.209975" diaginertia="0.000350037 0.000310157 0.000224806"/>
+                    <joint name="Elbow_L" pos="0 0 0" axis="0 1 0" range="-2.042 0.082" actuatorfrcrange="-31 31" armature="0.01" damping="0.01" frictionloss="0.01"/>
+                    <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.898039 0.917647 0.929412 1" mesh="FOREARM_L" class="visual"/>
+                    <geom type="mesh" rgba="0.898039 0.917647 0.929412 1" mesh="FOREARM_L" class="collision"/>
+                    <body name="WRIST_REVOLUTE_L" pos="0 0 -0.0685" gravcomp="1">
+                      <inertial pos="5.7727e-05 0.0017166 -0.068778" quat="0.713373 -0.0146232 0.0156277 0.700458" mass="1.455" diaginertia="0.00428408 0.00427001 0.000959912"/>
+                      <joint name="Wrist_Z_L" pos="0 0 0" axis="0 0 1" range="-2.9147 2.9147" actuatorfrcrange="-25 25" armature="0.01" damping="0.01" frictionloss="0.01"/>
+                      <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 1 1 1" mesh="WRIST_REVOLUTE_L" class="visual"/>
+                      <geom type="mesh" rgba="1 1 1 1" mesh="WRIST_REVOLUTE_L" class="collision"/>
+                      <body name="WRIST_UPDOWN_L" pos="0 0 -0.1385" gravcomp="1">
+                        <inertial pos="0.0035454 0.00067359 -0.053675" quat="0.996589 0.0629415 0.0439295 -0.0303013" mass="0.48691" diaginertia="0.000423434 0.000379041 0.000246525"/>
+                        <joint name="Wrist_Y_L" pos="0 0 0" axis="0 1 0" range="-1.5184 1.2566" actuatorfrcrange="-16 16" armature="0.01" damping="0.01" frictionloss="0.01"/>
+                        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 0.686275 0.870588 1" mesh="WRIST_UPDOWN_L" class="visual"/>
+                        <geom type="mesh" rgba="1 0.686275 0.870588 1" mesh="WRIST_UPDOWN_L" class="collision"/>
+                        <body name="WRIST_FLANGE_L" pos="0 0 -0.063" gravcomp="1">
+                          <inertial pos="0.015272 -4.1541e-05 -0.023533" quat="0 0.92388 0 0.382683" mass="0.064954" diaginertia="6.3e-05 5.9e-05 2.7e-05"/>
+                          <joint name="Wrist_X_L" pos="0 0 0" axis="1 0 0" range="-1.5184 1.5184" actuatorfrcrange="-16 16" armature="0.01" damping="0.01" frictionloss="0.01"/>
+                          <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.898039 0.917647 0.929412 1" mesh="WRIST_FLANGE_L" class="visual"/>
+                          <geom type="mesh" rgba="0.898039 0.917647 0.929412 1" mesh="WRIST_FLANGE_L" class="collision"/>
+                          <body name="TCP_L" pos="0 0 -0.060997" gravcomp="1">
+                            <inertial pos="0.00170185 -0.000788384 0.00447737" quat="0 0.707107 0 0.707107" mass="0.03" diaginertia="3e-06 2e-06 1e-06"/>
+                            <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 1 1 1" mesh="TCP_L" class="visual"/>
+                            <geom type="mesh" rgba="1 1 1 1" mesh="TCP_L" class="collision"/>
+                          </body>
+                        </body>
+                      </body>
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+            <body name="SCAPULA_R" pos="0.0074317 -0.16387 0.39" quat="0.965926 0 0 0.25882" gravcomp="1">
+              <inertial pos="-0.000401938 -0.0700579 -9.25479e-05" quat="-0.116849 0.694592 -0.157753 0.6921" mass="1.11871" diaginertia="0.00135689 0.00119239 0.00111172"/>
+              <joint name="Shoulder_Y_R" pos="0 0 0" axis="0 1 0" range="-3.2638 1.1694" actuatorfrcrange="-57 57" armature="0.01" damping="0.01" frictionloss="0.01"/>
+              <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.898039 0.917647 0.929412 1" mesh="SCAPULA_R" class="visual"/>
+              <geom type="mesh" rgba="0.898039 0.917647 0.929412 1" mesh="SCAPULA_R" class="collision"/>
+              <body name="SHOULDER_R" pos="0 -0.075202 0" quat="0.984807 0.17365 0 0" gravcomp="1">
+                <inertial pos="0.021655 -0.0013531 -0.03639" quat="0.0633241 0.909858 0.156079 0.379193" mass="0.240961" diaginertia="0.000494228 0.000437778 0.000239994"/>
+                <joint name="Shoulder_X_R" pos="0 0 0" axis="1 0 0" range="-3.0892 0.0035" actuatorfrcrange="-57 57" armature="0.01" damping="0.01" frictionloss="0.01"/>
+                <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.898039 0.917647 0.929412 1" mesh="SHOULDER_R" class="visual"/>
+                <geom type="mesh" rgba="0.898039 0.917647 0.929412 1" mesh="SHOULDER_R" class="collision"/>
+                <body name="UPPERARM_R" pos="0 0 -0.0845" gravcomp="1">
+                  <inertial pos="-0.00057166 -0.000199247 -0.073521" quat="0.999994 0.00186187 -0.00281606 0.00120124" mass="1.70222" diaginertia="0.0073492 0.00729509 0.00112972"/>
+                  <joint name="Shoulder_Z_R" pos="0 0 0" axis="0 0 1" range="-2.8885 2.8885" actuatorfrcrange="-57 57" armature="0.01" damping="0.01" frictionloss="0.01"/>
+                  <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.898039 0.917647 0.929412 1" mesh="UPPERARM_R" class="visual"/>
+                  <geom type="mesh" rgba="0.898039 0.917647 0.929412 1" mesh="UPPERARM_R" class="collision"/>
+                  <body name="FOREARM_R" pos="0 0 -0.1555" gravcomp="1">
+                    <inertial pos="-0.00302173 0.00211862 -0.0303563" quat="0.664096 0.747502 -0.0130254 0.00685861" mass="0.210684" diaginertia="0.000350038 0.000311156 0.000225806"/>
+                    <joint name="Elbow_R" pos="0 0 0" axis="0 1 0" range="-2.042 0.082" actuatorfrcrange="-31 31" armature="0.01" damping="0.01" frictionloss="0.01"/>
+                    <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.898039 0.917647 0.929412 1" mesh="FOREARM_R" class="visual"/>
+                    <geom type="mesh" rgba="0.898039 0.917647 0.929412 1" mesh="FOREARM_R" class="collision"/>
+                    <body name="WRIST_REVOLUTE_R" pos="0 0 -0.0685" gravcomp="1">
+                      <inertial pos="5.7765e-05 -0.0017166 -0.068778" quat="0.700458 0.0156277 -0.0146232 0.713373" mass="1.455" diaginertia="0.00428408 0.00427001 0.000959912"/>
+                      <joint name="Wrist_Z_R" pos="0 0 0" axis="0 0 1" range="-2.9147 2.9147" actuatorfrcrange="-25 25" armature="0.01" damping="0.01" frictionloss="0.01"/>
+                      <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 1 1 1" mesh="WRIST_REVOLUTE_R" class="visual"/>
+                      <geom type="mesh" rgba="1 1 1 1" mesh="WRIST_REVOLUTE_R" class="collision"/>
+                      <body name="WRIST_UPDOWN_R" pos="0 0 -0.1385" gravcomp="1">
+                        <inertial pos="0.0035804 -0.00054646 -0.053983" quat="0.997399 -0.0516639 0.0430355 0.0259795" mass="0.48452" diaginertia="0.000412293 0.000368263 0.000245444"/>
+                        <joint name="Wrist_Y_R" pos="0 0 0" axis="0 1 0" range="-1.5184 1.2566" actuatorfrcrange="-16 16" armature="0.01" damping="0.01" frictionloss="0.01"/>
+                        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 0.686275 0.870588 1" mesh="WRIST_UPDOWN_R" class="visual"/>
+                        <geom type="mesh" rgba="1 0.686275 0.870588 1" mesh="WRIST_UPDOWN_R" class="collision"/>
+                        <body name="WRIST_FLANGE_R" pos="0 0 -0.063" gravcomp="1">
+                          <inertial pos="0.013544 2.8986e-05 -0.02767" quat="0 0.92388 0 0.382683" mass="0.064977" diaginertia="6.3e-05 5.9e-05 2.7e-05"/>
+                          <joint name="Wrist_X_R" pos="0 0 0" axis="1 0 0" range="-1.5184 1.5184" actuatorfrcrange="-16 16" armature="0.01" damping="0.01" frictionloss="0.01"/>
+                          <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.792157 0.819608 0.933333 1" mesh="WRIST_FLANGE_R" class="visual"/>
+                          <geom type="mesh" rgba="0.792157 0.819608 0.933333 1" mesh="WRIST_FLANGE_R" class="collision"/>
+                          <body name="TCP_R" pos="0 0 -0.060997" gravcomp="1">
+                            <inertial pos="0.00170185 -0.000788384 0.00447737" quat="0 0.707107 0 0.707107" mass="0.03" diaginertia="3e-06 2e-06 1e-06"/>
+                            <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 1 1 1" mesh="TCP_R" class="visual"/>
+                            <geom type="mesh" rgba="1 1 1 1" mesh="TCP_R" class="collision"/>
+                            <body name="endoscope" pos="0.01 0 0" quat="0.7071068 0 0.7071068 0" gravcomp="1">
+                              <inertial pos="-2.8843e-08 1.2151e-06 -0.086544" mass="0.071614" fullinertia="0.00057368 0.00057368 5.5728e-06 -8.002e-12 -5.5665e-10 2.7205e-08"/>
+                              <geom name="endoscope_visual" type="mesh" mesh="endoscope_mesh" class="visual"/>
+                              <geom name="endoscope_collision" type="mesh" mesh="endoscope_mesh" class="collision"/>
+                              <site name="endoscope_tcp" pos="0 0 -0.4" size="0.005" rgba="1 0.2 0.2 1"/>
+                            </body>
+                          </body>
+                        </body>
+                      </body>
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+            <body name="NECK" pos="0 0 0.531" gravcomp="1">
+              <inertial pos="-0.000120663 0.000126274 0.0384337" quat="0.918481 0.395465 0 0" mass="0.256801" diaginertia="0.000108 9.55139e-05 7.74861e-05"/>
+              <joint name="Neck_Z" pos="0 0 0" axis="0 0 1" range="-0.733 0.733" actuatorfrcrange="-7 7" armature="0.01" damping="0.01" frictionloss="0.01"/>
+              <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.890196 0.890196 0.913725 1" mesh="NECK" class="visual"/>
+              <geom type="mesh" rgba="0.890196 0.890196 0.913725 1" mesh="NECK" class="collision"/>
+              <body name="HEAD" pos="0 0 0.042" gravcomp="1">
+                <inertial pos="0.0158688 -0.000733077 0.0794555" quat="0.636199 0.272076 0.203362 0.692726" mass="0.727085" diaginertia="0.00261995 0.0023937 0.00181935"/>
+                <joint name="Neck_Y" pos="0 0 0" axis="0 1 0" range="-0.1693 0.6056" actuatorfrcrange="-7 7" armature="0.01" damping="0.01" frictionloss="0.01"/>
+                <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 1 1 1" mesh="HEAD" class="visual"/>
+                <geom type="mesh" rgba="1 1 1 1" mesh="HEAD" class="collision"/>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="LEFT_FRONT_TURN_WHEEL" pos="0.31144 0.168 -0.19519" quat="0.999943 0 0.0106783 0" gravcomp="1">
+        <inertial pos="0.0113496 0.00544868 -0.00825526" quat="0.00580399 0.722002 -0.0390068 0.690766" mass="0.363256" diaginertia="0.0003205 0.000244553 0.000187166"/>
+        <joint name="Left_Front_Turn" pos="0 0 0" axis="0 0 1"/>
+        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.792157 0.819608 0.929412 1" mesh="LEFT_FRONT_TURN_WHEEL" class="visual"/>
+        <geom type="mesh" rgba="0.792157 0.819608 0.929412 1" mesh="LEFT_FRONT_TURN_WHEEL" class="collision"/>
+        <body name="LEFT_FRONT_ROLL_WHEEL" pos="0.02775 -0.002 -0.041" quat="0.999943 0 -0.0106783 0" gravcomp="1">
+          <inertial pos="0 -0.015 0" quat="0.707107 0 0 0.707107" mass="0.129844" diaginertia="9.00218e-05 5.41185e-05 5.41185e-05"/>
+          <joint name="Left_Front_Roll" pos="0 0 0" axis="0 1 0"/>
+          <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.792157 0.819608 0.929412 1" mesh="LEFT_FRONT_ROLL_WHEEL" class="visual"/>
+          <geom type="mesh" rgba="0.792157 0.819608 0.929412 1" mesh="LEFT_FRONT_ROLL_WHEEL" class="collision"/>
+        </body>
+      </body>
+      <body name="RIGHT_FRONT_TURN_WHEEL" pos="0.31144 -0.168 -0.19519" quat="0.999943 0 0.0106783 0" gravcomp="1">
+        <inertial pos="0.0113496 0.00544868 -0.00825526" quat="0.00580399 0.722002 -0.0390068 0.690766" mass="0.363256" diaginertia="0.0003205 0.000244553 0.000187166"/>
+        <joint name="Right_Front_Turn" pos="0 0 0" axis="0 0 1"/>
+        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.792157 0.819608 0.929412 1" mesh="RIGHT_FRONT_TURN_WHEEL" class="visual"/>
+        <geom type="mesh" rgba="0.792157 0.819608 0.929412 1" mesh="RIGHT_FRONT_TURN_WHEEL" class="collision"/>
+        <body name="RIGHT_FRONT_ROLL_WHEEL" pos="0.02775 0.002 -0.041" quat="0.999943 0 -0.0106783 0" gravcomp="1">
+          <inertial pos="0 -0.019 0" quat="0.707107 0 0 0.707107" mass="0.129844" diaginertia="9.00218e-05 5.41185e-05 5.41185e-05"/>
+          <joint name="Right_Front_Roll" pos="0 0 0" axis="0 1 0"/>
+          <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.792157 0.819608 0.929412 1" mesh="RIGHT_FRONT_ROLL_WHEEL" class="visual"/>
+          <geom type="mesh" rgba="0.792157 0.819608 0.929412 1" mesh="RIGHT_FRONT_ROLL_WHEEL" class="collision"/>
+        </body>
+      </body>
+      <body name="LEFT_BACK_TURN_WHEEL" pos="-0.31145 0.168 -0.1965" quat="0.99979 0 -0.0204706 0" gravcomp="1">
+        <inertial pos="-0.0113496 -0.00544868 -0.00825526" quat="0.0390068 0.690766 -0.00580399 0.722002" mass="0.363256" diaginertia="0.0003205 0.000244553 0.000187166"/>
+        <joint name="Left_Back_Turn" pos="0 0 0" axis="0 0 1"/>
+        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.792157 0.819608 0.929412 1" mesh="LEFT_BACK_TURN_WHEEL" class="visual"/>
+        <geom type="mesh" rgba="0.792157 0.819608 0.929412 1" mesh="LEFT_BACK_TURN_WHEEL" class="collision"/>
+        <body name="LEFT_BACK_ROLL_WHEEL" pos="-0.02775 -0.002 -0.041" quat="0.99979 0 0.0204706 0" gravcomp="1">
+          <inertial pos="0 0.019 0" quat="0.707107 0 0 0.707107" mass="0.129844" diaginertia="9.00218e-05 5.41185e-05 5.41185e-05"/>
+          <joint name="Left_Back_Roll" pos="0 0 0" axis="0 1 0"/>
+          <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.792157 0.819608 0.929412 1" mesh="LEFT_BACK_ROLL_WHEEL" class="visual"/>
+          <geom type="mesh" rgba="0.792157 0.819608 0.929412 1" mesh="LEFT_BACK_ROLL_WHEEL" class="collision"/>
+        </body>
+      </body>
+      <body name="RIGHT_BACK_TURN_WHEEL" pos="-0.31145 -0.1675 -0.1965" quat="0.99979 0 -0.0204706 0" gravcomp="1">
+        <inertial pos="-0.0113496 -0.00544868 -0.00825526" quat="0.0390068 0.690766 -0.00580399 0.722002" mass="0.363256" diaginertia="0.0003205 0.000244553 0.000187166"/>
+        <joint name="Right_Back_Turn" pos="0 0 0" axis="0 0 1"/>
+        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.792157 0.819608 0.929412 1" mesh="RIGHT_BACK_TURN_WHEEL" class="visual"/>
+        <geom type="mesh" rgba="0.792157 0.819608 0.929412 1" mesh="RIGHT_BACK_TURN_WHEEL" class="collision"/>
+        <body name="RIGHT_BACK_ROLL_WHEEL" pos="-0.02775 0.002 -0.041" quat="0.99979 0 0.0204706 0" gravcomp="1">
+          <inertial pos="0 0.015 0" quat="0.707107 0 0 0.707107" mass="0.129844" diaginertia="9.00218e-05 5.41185e-05 5.41185e-05"/>
+          <joint name="Right_Back_Roll" pos="0 0 0" axis="0 1 0"/>
+          <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.792157 0.819608 0.929412 1" mesh="RIGHT_BACK_ROLL_WHEEL" class="visual"/>
+          <geom type="mesh" rgba="0.792157 0.819608 0.929412 1" mesh="RIGHT_BACK_ROLL_WHEEL" class="collision"/>
+        </body>
+      </body>
+      <body name="LEFT_ROLL_WHEEL" pos="-0.00037875 0.199 -0.19503" gravcomp="1">
+        <inertial pos="0 0.0208557 0" quat="0.707107 0 0 0.707107" mass="0.34242" diaginertia="0.00131239 0.000697486 0.000697486"/>
+        <joint name="Left_Roll" pos="0 0 0" axis="0 1 0" actuatorfrcrange="-28.65 28.65" armature="0.01" damping="0.01" frictionloss="0.01"/>
+        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.792157 0.819608 0.933333 1" mesh="LEFT_ROLL_WHEEL" class="visual"/>
+        <geom type="mesh" rgba="0.792157 0.819608 0.933333 1" mesh="LEFT_ROLL_WHEEL" class="collision"/>
+      </body>
+      <body name="RIGHT_ROLL_WHEEL" pos="-0.00037875 -0.199 -0.19503" gravcomp="1">
+        <inertial pos="0 -0.0208557 0" quat="0.707107 0 0 0.707107" mass="0.34242" diaginertia="0.00131239 0.000697486 0.000697486"/>
+        <joint name="Right_Roll" pos="0 0 0" axis="0 1 0" actuatorfrcrange="-28.65 28.65" armature="0.01" damping="0.01" frictionloss="0.01"/>
+        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.792157 0.819608 0.933333 1" mesh="RIGHT_ROLL_WHEEL" class="visual"/>
+        <geom type="mesh" rgba="0.792157 0.819608 0.933333 1" mesh="RIGHT_ROLL_WHEEL" class="collision"/>
+      </body>
+    </body>
+  </worldbody>
+  <actuator>
+    <position name="Lifting_Z" joint="Lifting_Z" gear="1" kp="50000" kv="2000" ctrllimited="true" ctrlrange="0 0.234" forcelimited="true" forcerange="-6780.0 6780.0"/>
+    <position name="Waist_Z" joint="Waist_Z" gear="1" kp="500" kv="30" ctrllimited="true" ctrlrange="-2.042 3.0892" forcelimited="true" forcerange="-290.0 290.0"/>
+    <position name="Waist_Y" joint="Waist_Y" gear="1" kp="1000" kv="60" ctrllimited="true" ctrlrange="-0.5184 0.733" forcelimited="true" forcerange="-290.0 290.0"/>
+    <position name="Shoulder_Y_L" joint="Shoulder_Y_L" gear="1" kp="500" kv="30" ctrllimited="true" ctrlrange="-3.2638 1.1694" forcelimited="true" forcerange="-57.0 57.0"/>
+    <position name="Shoulder_X_L" joint="Shoulder_X_L" gear="1" kp="500" kv="30" ctrllimited="true" ctrlrange="-0.0035 3.0892" forcelimited="true" forcerange="-57.0 57.0"/>
+    <position name="Shoulder_Z_L" joint="Shoulder_Z_L" gear="1" kp="500" kv="30" ctrllimited="true" ctrlrange="-2.8885 2.8885" forcelimited="true" forcerange="-57.0 57.0"/>
+    <position name="Elbow_L" joint="Elbow_L" gear="1" kp="500" kv="30" ctrllimited="true" ctrlrange="-2.042 0.082" forcelimited="true" forcerange="-31.0 31.0"/>
+    <position name="Wrist_Z_L" joint="Wrist_Z_L" gear="1" kp="500" kv="30" ctrllimited="true" ctrlrange="-2.9147 2.9147" forcelimited="true" forcerange="-25.0 25.0"/>
+    <position name="Wrist_Y_L" joint="Wrist_Y_L" gear="1" kp="500" kv="30" ctrllimited="true" ctrlrange="-1.5184 1.2566" forcelimited="true" forcerange="-16.0 16.0"/>
+    <position name="Wrist_X_L" joint="Wrist_X_L" gear="1" kp="500" kv="30" ctrllimited="true" ctrlrange="-1.5184 1.5184" forcelimited="true" forcerange="-16.0 16.0"/>
+    <position name="Shoulder_Y_R" joint="Shoulder_Y_R" gear="1" kp="500" kv="30" ctrllimited="true" ctrlrange="-3.2638 1.1694" forcelimited="true" forcerange="-57.0 57.0"/>
+    <position name="Shoulder_X_R" joint="Shoulder_X_R" gear="1" kp="500" kv="30" ctrllimited="true" ctrlrange="-3.0892 0.0035" forcelimited="true" forcerange="-57.0 57.0"/>
+    <position name="Shoulder_Z_R" joint="Shoulder_Z_R" gear="1" kp="500" kv="30" ctrllimited="true" ctrlrange="-2.8885 2.8885" forcelimited="true" forcerange="-57.0 57.0"/>
+    <position name="Elbow_R" joint="Elbow_R" gear="1" kp="500" kv="30" ctrllimited="true" ctrlrange="-2.042 0.082" forcelimited="true" forcerange="-31.0 31.0"/>
+    <position name="Wrist_Z_R" joint="Wrist_Z_R" gear="1" kp="500" kv="30" ctrllimited="true" ctrlrange="-2.9147 2.9147" forcelimited="true" forcerange="-25.0 25.0"/>
+    <position name="Wrist_Y_R" joint="Wrist_Y_R" gear="1" kp="500" kv="30" ctrllimited="true" ctrlrange="-1.5184 1.2566" forcelimited="true" forcerange="-16.0 16.0"/>
+    <position name="Wrist_X_R" joint="Wrist_X_R" gear="1" kp="500" kv="30" ctrllimited="true" ctrlrange="-1.5184 1.5184" forcelimited="true" forcerange="-16.0 16.0"/>
+    <position name="Neck_Z" joint="Neck_Z" gear="1" kp="500" kv="30" ctrllimited="true" ctrlrange="-0.733 0.733" forcelimited="true" forcerange="-7.0 7.0"/>
+    <position name="Neck_Y" joint="Neck_Y" gear="1" kp="500" kv="30" ctrllimited="true" ctrlrange="-0.1693 0.6056" forcelimited="true" forcerange="-7.0 7.0"/>
+    <motor name="Left_Roll" joint="Left_Roll" gear="1" ctrllimited="true" ctrlrange="-28.65 28.65"/>
+    <motor name="Right_Roll" joint="Right_Roll" gear="1" ctrllimited="true" ctrlrange="-28.65 28.65"/>
+  </actuator>
+  <keyframe>
+    <key name="home" qpos="0.0 0.0 0.0 0.0 0.436 0.5234 0.0 0.0 0.0 0.0 0.0 -0.436 -0.5234 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0" ctrl="0.0 0.0 0.0 0.0 0.436 0.5234 0.0 0.0 0.0 0.0 0.0 -0.436 -0.5234 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0"/>
+  </keyframe>
+</mujoco>

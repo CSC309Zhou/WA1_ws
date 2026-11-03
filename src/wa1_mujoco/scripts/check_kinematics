@@ -1,0 +1,107 @@
+#!/usr/bin/env python3
+"""Cross-check official offline FK/IK against MuJoCo without a robot or ROS graph."""
+
+import argparse
+import json
+import mujoco
+import numpy as np
+from wa1_mujoco.kinematics import (LEFT, RIGHT, OfflineKinematics,
+                                  joint_positions, load_home,
+                                  pose_error, pose_in_base, set_joint_positions)
+
+
+TELEOP_LEFT = [0.84, 0.49, 1.00, -1.96, 0.09, -0.08, 0.02]
+TELEOP_RIGHT = [0.84, -0.49, -1.00, -1.96, -0.09, -0.08, -0.02]
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description='Verify installed WA1 MuJoCo model and offline FK/IK')
+    parser.add_argument('--expect-endoscope-quat', nargs=4, type=float,
+                        metavar=('W', 'X', 'Y', 'Z'),
+                        help='Expected endoscope quaternion relative to TCP_R')
+    args = parser.parse_args()
+    model, data = load_home()
+    if not np.allclose(model.opt.gravity, [0.0, 0.0, -9.81]):
+        raise AssertionError('scene gravity must remain -9.81 m/s^2')
+    if not np.allclose(model.body_gravcomp[1:], 1.0):
+        raise AssertionError('every robot body must have gravcomp=1')
+    kin = OfflineKinematics(model)
+    cases = [('home', {}),
+             ('teleop', dict(zip(LEFT + RIGHT,
+                                 TELEOP_LEFT + TELEOP_RIGHT))),
+             ('torso', {'Lifting_Z': 0.08, 'Waist_Z': 0.18, 'Waist_Y': -0.12})]
+    results = []
+    for name, changes in cases:
+        mujoco.mj_resetDataKeyframe(model, data, model.key('home').id)
+        set_joint_positions(model, data, changes)
+        joints = joint_positions(model, data)
+        for side in ('left', 'right'):
+            expected = pose_in_base(data, side)
+            actual = kin.forward(joints, side)
+            position, rotation = pose_error(actual, expected)
+            results.append({'case': name, 'side': side,
+                            'fk_position_error_m': position,
+                            'fk_rotation_error_deg': rotation})
+            if position > 0.002 or rotation > 0.2:
+                raise AssertionError(f'FK mismatch: {results[-1]}')
+
+    for case_name, torso in [('teleop', {}),
+                             ('teleop_with_torso', {'Lifting_Z': 0.08,
+                                                    'Waist_Z': 0.18, 'Waist_Y': -0.12})]:
+        mujoco.mj_resetDataKeyframe(model, data, model.key('home').id)
+        set_joint_positions(model, data, dict(zip(LEFT + RIGHT,
+                                                 TELEOP_LEFT + TELEOP_RIGHT)) | torso)
+        reference = joint_positions(model, data)
+        for side in ('left', 'right'):
+            target = pose_in_base(data, side)
+            solutions = kin.solve(target, side, reference)
+            chosen = kin.nearest(solutions, reference)
+            if chosen is None:
+                raise AssertionError(f'official IK returned no solution for {case_name} {side}')
+            set_joint_positions(model, data, chosen['joints'])
+            reached = pose_in_base(data, side)
+            position, rotation = pose_error(reached, target)
+            results.append({'case': case_name, 'side': side,
+                            'ik_solutions': len(solutions),
+                            'ik_position_error_m': position,
+                            'ik_rotation_error_deg': rotation})
+            if position > 0.002 or rotation > 0.2:
+                raise AssertionError(f'IK mismatch: {results[-1]}')
+            set_joint_positions(model, data, {name: reference[name] for name in chosen['joints']})
+
+    endoscope = data.body('endoscope')
+    right_tcp = data.body('TCP_R')
+    site = data.site('endoscope_tcp')
+    mount_id = model.body('endoscope').id
+    mount_position = model.body_pos[mount_id].tolist()
+    mount_quaternion = model.body_quat[mount_id].tolist()
+    tip_position = (np.asarray(right_tcp.xmat).reshape(3, 3).T @
+                    (site.xpos - right_tcp.xpos)).tolist()
+    tip_offset = float(np.linalg.norm(site.xpos - endoscope.xpos))
+    if abs(tip_offset - 0.4) > 1e-6:
+        raise AssertionError('endoscope_tcp must be 0.4 m from its parent frame')
+    if args.expect_endoscope_quat is not None:
+        expected = np.asarray(args.expect_endoscope_quat, dtype=float)
+        expected /= np.linalg.norm(expected)
+        if abs(float(np.dot(expected, mount_quaternion))) < 1 - 1e-6:
+            raise AssertionError(f'installed endoscope quaternion is {mount_quaternion}, expected {expected.tolist()}')
+
+    mujoco.mj_resetDataKeyframe(model, data, model.key('home').id)
+    for _ in range(round(2.0 / model.opt.timestep)):
+        mujoco.mj_step(model, data)
+    if not np.all(np.isfinite(data.qpos)) or not np.all(np.isfinite(data.qvel)):
+        raise AssertionError('MuJoCo state became non-finite')
+    print(json.dumps({'status': 'passed', 'network_used': False,
+                      'robot_required': False, 'fk_ik': results,
+                      'scene_gravity_m_s2': model.opt.gravity.tolist(),
+                      'compensated_robot_bodies': model.nbody - 1,
+                      'endoscope_position_in_tcp_m': mount_position,
+                      'endoscope_quaternion_in_tcp_wxyz': mount_quaternion,
+                      'endoscope_tip_position_in_tcp_m': tip_position,
+                      'endoscope_tip_offset_m': tip_offset,
+                      'simulated_seconds': 2.0}, indent=2))
+    return 0
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>wa1_mujoco</name>
+  <version>0.1.0</version>
+  <description>Offline WA1 MuJoCo simulation with official dual-arm TCP kinematics.</description>
+  <maintainer email="leiwang2025.csc.zju@gmail.com">WangLei</maintainer>
+  <license>Proprietary</license>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
+  <build_depend>eigen3_cmake_module</build_depend>
+  <build_depend>eigen</build_depend>
+  <exec_depend>ament_index_python</exec_depend>
+  <export><build_type>ament_cmake</build_type></export>
+</package>

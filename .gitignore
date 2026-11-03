@@ -15,6 +15,7 @@ htmlcov/
 # Generated experiment output; source fixtures remain tracked
 **/results/
 /native_bridge/results/
+MUJOCO_LOG.TXT
 *.pcap
 *.bag
 *.db3

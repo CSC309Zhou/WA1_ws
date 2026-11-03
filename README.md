@@ -12,6 +12,7 @@
 | [`src/pico4_ros2`](src/pico4_ros2) | 与机器人无关的 PICO4 SDK 接入、消息和查看器 |
 | [`src/wa1_pico4_teleop`](src/wa1_pico4_teleop) | PICO4 到 WA1 双臂的映射和操作状态机 |
 | [`src/wa1_description`](src/wa1_description/README.md) | WA1 模型与可视化资源 |
+| [`src/wa1_mujoco`](src/wa1_mujoco/README.md) | 完全离线的 MuJoCo 场景、右臂内窥镜模型及官方双臂 TCP FK/IK |
 | [`native_bridge`](native_bridge) | ROS1↔ROS2 原生桥、增量 Dockerfile、PC Docker 管理器和验收脚本 |
 | [`head_camera_viewer`](head_camera_viewer) | PC 本地浏览器查看头部 RealSense 彩色与对齐深度图像 |
 | [`jetson/perception/apriltag`](jetson/perception/apriltag/README.md) | Jetson 本地 Tag36h11 ID 0 检测、相机与上肢 BASE 位姿发布 |
@@ -44,6 +45,7 @@ PICO4 PC Service 安装包由 Git LFS 保存；版本与 SHA-256 见 [`pico4_ros
 | `git`、`docker login`、`native_bridge/pc_docker.py`、`native_bridge/bridge.py build/start/stop/logs` | 无需加载 ROS2 环境。 |
 | `head_camera_viewer/head_camera_viewer.py` | 无需加载 ROS2 环境；使用包含 OpenCV、NumPy 和 websocket-client 的 Python 环境。 |
 | `colcon build`、`colcon test` | `source /opt/ros/humble/setup.bash`。 |
+| `ros2 run wa1_mujoco ...` | 先激活含 MuJoCo 依赖的 Python 环境，再加载 ROS 2 Humble 和 `install/setup.bash`；不使用桥的网络配置。 |
 | `native_bridge/tests/run_mock_test.py` | 无需手动加载 ROS2 环境；脚本会为其 ROS2 子进程设置模拟 domain 和运行环境。 |
 | 真机 PICO4 接收、查看器、桥接话题查询、遥操作、监视器及手动验收脚本 | 先设 `ROS_DOMAIN_ID=0`，再加载 `native_bridge/setup_pc.bash`。 |
 | PICO4 JSONL 回放及对应查看器 | 两个终端均先设 `ROS_DOMAIN_ID=85`，再加载 `native_bridge/setup_pc.bash`。 |
@@ -93,6 +95,8 @@ python3 native_bridge/bridge.py stop
 在另一个终端按上面的真机运行环境命令加载 `native_bridge/setup_pc.bash`，再运行 ROS2 客户端。机器人网络地址、桥接接口和测试入口见 [`native_bridge` 说明](native_bridge/README.md)。仅在 PC 上验证桥的消息转换与控制路径，可直接运行 `python3 native_bridge/tests/run_mock_test.py --seconds 3`。
 
 PICO4 独立接入和浏览器可视化见 [`pico4_ros2` 说明](src/pico4_ros2/README.md)；完整双臂遥操作的启动顺序、按键与状态查看见 [`wa1_pico4_teleop` 说明](src/wa1_pico4_teleop/README.md)。上肢保护模式与安全锁的查询、显式解锁见 [`wa1_robot_state` 说明](src/wa1_robot_state/README.md)。本地实验版与目录调整的记录见 [代码整理计划](CODE_ORGANIZATION_PLAN.md)。
+
+MuJoCo 离线仿真与官方双臂 TCP FK/IK 位于 [`wa1_mujoco`](src/wa1_mujoco/README.md)。它可在无机器人、无桥容器的 PC 上独立运行；按该包说明安装 Python 依赖、编译并运行 `ros2 run wa1_mujoco check_kinematics` 或 `ros2 run wa1_mujoco launch_sim`。
 
 ## 本地查看头部相机
 

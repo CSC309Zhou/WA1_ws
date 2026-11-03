@@ -1,0 +1,119 @@
+init_state:
+  root_pos: [0, 0, 1]
+  root_rot: [0, 0, 0, 1]
+  joint_pos:
+    ".*": 0
+
+# Values used when robot_cfg.yaml is regenerated with --override.
+initial_joint_positions:
+  WA1_400L:
+    Shoulder_X_L: 0.4360
+    Shoulder_Z_L: 0.5234
+    Shoulder_X_R: -0.4360
+    Shoulder_Z_R: -0.5234
+
+joint_defaults:
+        # Defaults for actuated joints: [type, Tm, Vm, kp, kd, arma, fric, damp]
+  normal: [generic, 300, 30, 50, 4, 0.01, 0.01, 0.01]
+
+mujoco:
+  # Compensate robot link weight while keeping scene gravity for external objects.
+  robot_gravcomp:
+    WA1_400L: 1
+  position_servo_joints:
+    WA1_400L:
+      - Lifting_Z
+      - Waist_Z
+      - Waist_Y
+      - Shoulder_Y_L
+      - Shoulder_X_L
+      - Shoulder_Z_L
+      - Elbow_L
+      - Wrist_Z_L
+      - Wrist_Y_L
+      - Wrist_X_L
+      - Shoulder_Y_R
+      - Shoulder_X_R
+      - Shoulder_Z_R
+      - Elbow_R
+      - Wrist_Z_R
+      - Wrist_Y_R
+      - Wrist_X_R
+      - Neck_Z
+      - Neck_Y
+  position_servo_gains:
+    WA1_400L:
+      default: {kp: 500, kv: 30}
+      joint_overrides:
+        Lifting_Z: {kp: 50000, kv: 2000}
+        Waist_Y: {kp: 1000, kv: 60}
+  compiler:
+    balanceinertia: false
+    discardvisual: false
+  default_joint:
+    # Defaults for ordinary MuJoCo joints not listed in actuated_joints.
+    armature: 0.005
+    damping: 0.01
+    frictionloss: 0.01
+  visual_geom:
+    contype: 0
+    conaffinity: 0
+    group: 2
+    mass: 0
+    density: 0
+  collision_geom:
+    # Ignore intersections among the imported robot CAD meshes.
+    contype: 2
+    conaffinity: 1
+    group: 3
+    mass: 0
+    density: 0
+    friction: [1, 0.005, 0.0001]
+    condim: 4
+  equality:
+    connect:
+      solref: [0.001, 1]
+      solimp: [0.97, 0.99, 0.001]
+  scene:
+    option:
+      timestep: 0.0005
+      integrator: implicitfast
+      gravity: [0, 0, -9.81]
+      iterations: 50
+      tolerance: 1.0e-10
+      impratio: 10
+      cone: pyramidal
+    headlight:
+      diffuse: [0.6, 0.6, 0.6]
+      ambient: [0.3, 0.3, 0.3]
+      specular: [0, 0, 0]
+    haze: [0.15, 0.25, 0.35, 1]
+    grid_texture:
+      type: 2d
+      name: grid
+      builtin: checker
+      width: 256
+      height: 256
+      rgb1: [0.3, 0.3, 0.3]
+      rgb2: [0.4, 0.4, 0.4]
+    grid_material:
+      name: grid
+      texture: grid
+      texrepeat: [2, 2]
+      texuniform: true
+      reflectance: 0
+    light:
+      directional: true
+      diffuse: [0.8, 0.8, 0.8]
+      specular: [0.2, 0.2, 0.2]
+      pos: [0, 0, 5]
+      dir: [0, 0, -1]
+    floor:
+      name: floor
+      type: plane
+      contype: 1
+      conaffinity: 2
+      size: [0, 0, 0.05]
+      material: grid
+      condim: 3
+      friction: [1, 0.005, 0.005]

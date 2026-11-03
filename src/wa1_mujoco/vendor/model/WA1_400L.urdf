@@ -1,0 +1,1368 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<!-- Model: WA1  Version: 2.0
+     Date: 2026/4/15
+     Waist Yaw：-120°~180°
+     AMR: EMMA400L
+     Waist: G25
+     Wrist Pitch & Roll: D11
+     Full version see https://c1jw7i5fp7q.feishu.cn/wiki/JHRLwXDtXiLa7CkR9RkchTJqnLc?from=from_copylink -->
+<robot
+  name="WA1_400L">
+  <link
+    name="BASE">
+    <inertial>
+      <origin
+        xyz="0.030682 -0.000354 -0.012001"
+        rpy="0 0 0" />
+      <mass
+        value="150" />
+      <inertia
+        ixx="7.371032"
+        ixy="0.055694"
+        ixz="1.061098"
+        iyy="12.923026"
+        iyz="0.001021"
+        izz="13.101073" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/BASE.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/BASE.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="BODY">
+    <inertial>
+    <origin
+        xyz="-0.005690 0.001604 0.072438"
+        rpy="0 0 0" />
+      <mass
+        value="5.033155" />
+      <inertia
+        ixx="0.015981"
+        ixy="-0.000114"
+        ixz="0.001194"
+        iyy="0.015527"
+        iyz="0.000094"
+        izz="0.007944" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/BODY.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/BODY.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Lifting_Z"
+    type="prismatic">
+    <origin
+      xyz="0.31 0 0.492"
+      rpy="0 0 0" />
+    <parent
+      link="BASE" />
+    <child
+      link="BODY" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="0.000"
+      upper="0.235"
+      effort="6780"
+      velocity="0.05" />
+  </joint>
+  <link
+    name="WAIST_YAW">
+    <inertial>
+      <origin
+        xyz="-0.003603 -0.007880 0.064721"
+        rpy="0 0 0" />
+      <mass
+        value="4.309051" />
+      <inertia
+        ixx="0.010083"
+        ixy="0.000017"
+        ixz="-0.000045"
+        iyy="0.007537"
+        iyz="-0.000173"
+        izz="0.009907" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/WAIST_YAW.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.890196078431372 0.890196078431372 0.913725490196078 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/WAIST_YAW.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Waist_Z"
+    type="revolute">
+    <origin
+      xyz="0 0 0.1561"
+      rpy="0 0 0" />
+    <parent
+      link="BODY" />
+    <child
+      link="WAIST_YAW" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-2.0420"
+      upper="3.0892"
+      effort="290"
+      velocity="2.618" />
+  </joint>
+  <link
+    name="WAIST_PITCH">
+    <inertial>
+      <origin
+        xyz="-0.000269 0.000515 0.281894"
+        rpy="0 0 0" />
+      <mass
+        value="10.650477" />
+      <inertia
+        ixx="0.304421"
+        ixy="-0.000121"
+        ixz="-0.003477"
+        iyy="0.227840"
+        iyz="0.001287"
+        izz="0.122071" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/WAIST_PITCH.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/WAIST_PITCH.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Waist_Y"
+    type="revolute">
+    <origin
+      xyz="0 0 0.0744"
+      rpy="0 0 0" />
+    <parent
+      link="WAIST_YAW" />
+    <child
+      link="WAIST_PITCH" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-0.5184"
+      upper="0.7330"
+      effort="290"
+      velocity="2.618" />
+  </joint>
+  <link
+    name="SCAPULA_L">
+    <inertial>
+      <origin
+        xyz="-0.000401960497907319 0.0700578347208031 -9.26072263538469E-05"
+        rpy="0 0 0" />
+      <mass
+        value="1.118706" />
+      <inertia
+        ixx="0.001112"
+        ixy="-0.000005"
+        ixz="0.000000"
+        iyy="0.001216"
+        iyz="0.000058"
+        izz="0.001333" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/SCAPULA_L.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.341176470588235 1 0.768627450980392 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/SCAPULA_L.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Shoulder_Y_L"
+    type="revolute">
+    <origin
+      xyz="0.0074317 0.16387 0.39"
+      rpy="0 0 -0.5236" />
+    <parent
+      link="WAIST_PITCH" />
+    <child
+      link="SCAPULA_L" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-3.2638"
+      upper="1.1694"
+      effort="57"
+      velocity="3.56" />
+  </joint>
+  <link
+    name="SHOULDER_L">
+    <inertial>
+      <origin
+        xyz="0.021673 0.001368 -0.036388"
+        rpy="0 0 0" />
+      <mass
+        value="0.241160" />
+      <inertia
+        ixx="0.000363"
+        ixy="-0.000012"
+        ixz="0.000124"
+        iyy="0.000444"
+        iyz="-0.000013"
+        izz="0.000366" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/SHOULDER_L.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/SHOULDER_L.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Shoulder_X_L"
+    type="revolute">
+    <origin
+      xyz="0 0.075202 0"
+      rpy="-0.34907 0 0" />
+    <parent
+      link="SCAPULA_L" />
+    <child
+      link="SHOULDER_L" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-0.0035"
+      upper="3.0892"
+      effort="57"
+      velocity="3.56" />
+  </joint>
+  <link
+    name="UPPERARM_L">
+    <inertial>
+      <origin
+        xyz="-0.000571741478881255 0.000196200656739087 -0.0734511646910931"
+        rpy="0 0 0" />
+      <mass
+        value="1.702243" />
+      <inertia
+        ixx="0.007343"
+        ixy="0.000001"
+        ixz="0.000034"
+        iyy="0.007289"
+        iyz="-0.000022"
+        izz="0.001130" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/UPPERARM_L.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/UPPERARM_L.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Shoulder_Z_L"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.0845"
+      rpy="0 0 0" />
+    <parent
+      link="SHOULDER_L" />
+    <child
+      link="UPPERARM_L" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-2.8885"
+      upper="2.8885"
+      effort="57"
+      velocity="3.56" />
+  </joint>
+  <link
+    name="FOREARM_L">
+    <inertial>
+      <origin
+        xyz="-0.00293207363173763 -0.00206216218152966 -0.0303657371477064"
+        rpy="0 0 0" />
+      <mass
+        value="0.209975" />
+      <inertia
+        ixx="0.000350"
+        ixy="0.000001"
+        ixz="0.000001"
+        iyy="0.000226"
+        iyz="0.000010"
+        izz="0.000309" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/FOREARM_L.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/FOREARM_L.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Elbow_L"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.1555"
+      rpy="0 0 0" />
+    <parent
+      link="UPPERARM_L" />
+    <child
+      link="FOREARM_L" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-2.0420"
+      upper="0.0820"
+      effort="31"
+      velocity="3.66" />
+  </joint>
+  <link
+    name="WRIST_REVOLUTE_L">
+    <inertial>
+      <origin
+        xyz="5.7727E-05 0.0017166 -0.068778"
+        rpy="0 0 0" />
+      <mass
+        value="1.455" />
+      <inertia
+        ixx="0.004270"
+        ixy="0.000000"
+        ixz="-0.000006"
+        iyy="0.004278"
+        iyz="-0.000142"
+        izz="0.000966" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/WRIST_REVOLUTE_L.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/WRIST_REVOLUTE_L.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Wrist_Z_L"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.0685"
+      rpy="0 0 0" />
+    <parent
+      link="FOREARM_L" />
+    <child
+      link="WRIST_REVOLUTE_L" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-2.9147"
+      upper="2.9147"
+      effort="25"
+      velocity="3.66" />
+  </joint>
+  <link
+    name="WRIST_UPDOWN_L">
+    <inertial>
+      <origin
+        xyz="0.0035454 0.00067359 -0.053675"
+        rpy="0 0 0" />
+      <mass
+        value="0.48691" />
+      <inertia
+        ixx="0.000422"
+        ixy="-0.000001"
+        ixz="-0.000015"
+        iyy="0.000377"
+        iyz="0.000017"
+        izz="0.000250" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/WRIST_UPDOWN_L.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 0.686274509803922 0.870588235294118 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/WRIST_UPDOWN_L.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Wrist_Y_L"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.1385"
+      rpy="0 0 0" />
+    <parent
+      link="WRIST_REVOLUTE_L" />
+    <child
+      link="WRIST_UPDOWN_L" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-1.5184"
+      upper="1.2566"
+      effort="16"
+      velocity="3.66" />
+  </joint>
+  <link
+    name="WRIST_FLANGE_L">
+    <inertial>
+      <origin
+        xyz="0.015272 -4.1541E-05 -0.023533"
+        rpy="0 0 0" />
+      <mass
+        value="0.064954" />
+      <inertia
+        ixx="0.000045"
+        ixy="0.000000"
+        ixz="0.000018"
+        iyy="0.000059"
+        iyz="0.000000"
+        izz="0.000045" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/WRIST_FLANGE_L.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/WRIST_FLANGE_L.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Wrist_X_L"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.063"
+      rpy="0 0 0" />
+    <parent
+      link="WRIST_UPDOWN_L" />
+    <child
+      link="WRIST_FLANGE_L" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-1.5184"
+      upper="1.5184"
+      effort="16"
+      velocity="3.66" />
+  </joint>
+  <link
+    name="TCP_L">
+    <inertial>
+      <origin
+        xyz="0.00170185052441117 -0.000788384398018926 0.00447737078433064"
+        rpy="0 0 0" />
+      <mass
+        value="0.030000" />
+      <inertia
+        ixx="0.000001"
+        ixy="0.000000"
+        ixz="0.000000"
+        iyy="0.000002"
+        iyz="0.000000"
+        izz="0.000003" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/TCP_L.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/TCP_L.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Tcp_L"
+    type="fixed">
+    <origin
+      xyz="0 0 -0.060997"
+      rpy="0 0 0" />
+    <parent
+      link="WRIST_FLANGE_L" />
+    <child
+      link="TCP_L" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="HAND_L">
+    <inertial>
+      <origin
+        xyz="-0.00893713208279126 0.00154201093141962 0.0668059164208352"
+        rpy="0 0 0" />
+      <mass
+        value="0.372563" />
+      <inertia
+        ixx="0.000963"
+        ixy="-0.000054"
+        ixz="0.000074"
+        iyy="0.001361"
+        iyz="0.000030"
+        izz="0.000515" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/HAND_L.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/HAND_L.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Hand_L"
+    type="fixed">
+    <origin
+      xyz="0 0 0"
+      rpy="-3.1416 0 3.1416" />
+    <parent
+      link="TCP_L" />
+    <child
+      link="HAND_L" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="SCAPULA_R">
+    <inertial>
+      <origin
+        xyz="-0.000401937500299238 -0.0700578995461794 -9.25479085938097E-05"
+        rpy="0 0 0" />
+      <mass
+        value="1.118708" />
+      <inertia
+        ixx="0.001112"
+        ixy="0.000005"
+        ixz="0.000000"
+        iyy="0.001216"
+        iyz="-0.000058"
+        izz="0.001333" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/SCAPULA_R.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/SCAPULA_R.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Shoulder_Y_R"
+    type="revolute">
+    <origin
+      xyz="0.0074317 -0.16387 0.39"
+      rpy="0 0 0.5236" />
+    <parent
+      link="WAIST_PITCH" />
+    <child
+      link="SCAPULA_R" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-3.2638"
+      upper="1.1694"
+      effort="57"
+      velocity="3.56" />
+  </joint>
+  <link
+    name="SHOULDER_R">
+    <inertial>
+      <origin
+        xyz="0.021655 -0.0013531 -0.03639"
+        rpy="0 0 0" />
+      <mass
+        value="0.240961" />
+      <inertia
+        ixx="0.000363"
+        ixy="0.000012"
+        ixz="0.000124"
+        iyy="0.000444"
+        iyz="0.000013"
+        izz="0.000365" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/SHOULDER_R.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/SHOULDER_R.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Shoulder_X_R"
+    type="revolute">
+    <origin
+      xyz="0 -0.075202 0"
+      rpy="0.34907 0 0" />
+    <parent
+      link="SCAPULA_R" />
+    <child
+      link="SHOULDER_R" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-3.0892"
+      upper="0.0035"
+      effort="57"
+      velocity="3.56" />
+  </joint>
+  <link
+    name="UPPERARM_R">
+    <inertial>
+      <origin
+        xyz="-0.000571659780097766 -0.000199247313657919 -0.0735209654996671"
+        rpy="0 0 0" />
+      <mass
+        value="1.702218" />
+      <inertia
+        ixx="0.007349"
+        ixy="0.000000"
+        ixz="0.000035"
+        iyy="0.007295"
+        iyz="0.000023"
+        izz="0.001130" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/UPPERARM_R.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/UPPERARM_R.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Shoulder_Z_R"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.0845"
+      rpy="0 0 0" />
+    <parent
+      link="SHOULDER_R" />
+    <child
+      link="UPPERARM_R" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-2.8885"
+      upper="2.8885"
+      effort="57"
+      velocity="3.56" />
+  </joint>
+  <link
+    name="FOREARM_R">
+    <inertial>
+      <origin
+        xyz="-0.00302172787910894 0.0021186153301547 -0.0303563393686666"
+        rpy="0 0 0" />
+      <mass
+        value="0.210684" />
+      <inertia
+        ixx="0.000350"
+        ixy="-0.000001"
+        ixz="0.000001"
+        iyy="0.000227"
+        iyz="-0.000010"
+        izz="0.000310" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/FOREARM_R.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/FOREARM_R.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Elbow_R"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.1555"
+      rpy="0 0 0" />
+    <parent
+      link="UPPERARM_R" />
+    <child
+      link="FOREARM_R" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-2.0420"
+      upper="0.0820"
+      effort="31"
+      velocity="3.66" />
+  </joint>
+  <link
+    name="WRIST_REVOLUTE_R">
+    <inertial>
+      <origin
+        xyz="5.7765E-05 -0.0017166 -0.068778"
+        rpy="0 0 0" />
+      <mass
+        value="1.455" />
+      <inertia
+        ixx="0.004270"
+        ixy="0.000000"
+        ixz="-0.000006"
+        iyy="0.004278"
+        iyz="0.000142"
+        izz="0.000966" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/WRIST_REVOLUTE_R.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/WRIST_REVOLUTE_R.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Wrist_Z_R"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.0685"
+      rpy="0 0 0" />
+    <parent
+      link="FOREARM_R" />
+    <child
+      link="WRIST_REVOLUTE_R" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-2.9147"
+      upper="2.9147"
+      effort="25"
+      velocity="3.66" />
+  </joint>
+  <link
+    name="WRIST_UPDOWN_R">
+    <inertial>
+      <origin
+        xyz="0.0035804 -0.00054646 -0.053983"
+        rpy="0 0 0" />
+      <mass
+        value="0.48452" />
+      <inertia
+        ixx="0.000411"
+        ixy="0.000001"
+        ixz="-0.000014"
+        iyy="0.000367"
+        iyz="-0.000013"
+        izz="0.000248" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/WRIST_UPDOWN_R.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 0.686274509803922 0.870588235294118 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/WRIST_UPDOWN_R.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Wrist_Y_R"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.1385"
+      rpy="0 0 0" />
+    <parent
+      link="WRIST_REVOLUTE_R" />
+    <child
+      link="WRIST_UPDOWN_R" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-1.5184"
+      upper="1.2566"
+      effort="16"
+      velocity="3.66" />
+  </joint>
+  <link
+    name="WRIST_FLANGE_R">
+    <inertial>
+      <origin
+        xyz="0.013544 2.8986E-05 -0.02767"
+        rpy="0 0 0" />
+      <mass
+        value="0.064977" />
+      <inertia
+        ixx="0.000045"
+        ixy="0.000000"
+        ixz="0.000018"
+        iyy="0.000059"
+        iyz="0.000000"
+        izz="0.000045" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/WRIST_FLANGE_R.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/WRIST_FLANGE_R.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Wrist_X_R"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.063"
+      rpy="0 0 0" />
+    <parent
+      link="WRIST_UPDOWN_R" />
+    <child
+      link="WRIST_FLANGE_R" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-1.5184"
+      upper="1.5184"
+      effort="16"
+      velocity="3.66" />
+  </joint>
+  <link
+    name="TCP_R">
+    <inertial>
+      <origin
+        xyz="0.00170185052441145 -0.000788384398018926 0.0044773707843162"
+        rpy="0 0 0" />
+      <mass
+        value="0.030000" />
+      <inertia
+        ixx="0.000001"
+        ixy="0.000000"
+        ixz="0.000000"
+        iyy="0.000002"
+        iyz="0.000000"
+        izz="0.000003" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/TCP_R.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/TCP_R.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Tcp_R"
+    type="fixed">
+    <origin
+      xyz="0 0 -0.060997"
+      rpy="0 0 0" />
+    <parent
+      link="WRIST_FLANGE_R" />
+    <child
+      link="TCP_R" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="HAND_R">
+    <inertial>
+      <origin
+        xyz="-0.00915546813147938 -0.00203315095548909 0.0667981643225091"
+        rpy="0 0 0" />
+      <mass
+        value="0.372563" />
+      <inertia
+        ixx="0.000957"
+        ixy="0.000043"
+        ixz="0.000074"
+        iyy="0.001375"
+        iyz="-0.000035"
+        izz="0.000521" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/HAND_R.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/HAND_R.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Hand_R"
+    type="fixed">
+    <origin
+      xyz="0 0 0"
+      rpy="3.1416 0 -3.1416" />
+    <parent
+      link="TCP_R" />
+    <child
+      link="HAND_R" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="NECK">
+    <inertial>
+      <origin
+        xyz="-0.000120662515465927 0.000126273706920855 0.0384337194999462"
+        rpy="0 0 0" />
+      <mass
+        value="0.256801" />
+      <inertia
+        ixx="0.000108"
+        ixy="0.000000"
+        ixz="0.000000"
+        iyy="0.000086"
+        iyz="0.000009"
+        izz="0.000087" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/NECK.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.890196078431372 0.890196078431372 0.913725490196078 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/NECK.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Neck_Z"
+    type="revolute">
+    <origin
+      xyz="0 0 0.531"
+      rpy="0 0 0" />
+    <parent
+      link="WAIST_PITCH" />
+    <child
+      link="NECK" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-0.7330"
+      upper="0.7330"
+      effort="7"
+      velocity="3.66" />
+  </joint>
+  <link
+    name="HEAD">
+    <inertial>
+      <origin
+        xyz="0.0158688017248772 -0.000733076734547833 0.0794555090503724"
+        rpy="0 0 0" />
+      <mass
+        value="0.727085" />
+      <inertia
+        ixx="0.002162"
+        ixy="0.000014"
+        ixz="-0.000282"
+        iyy="0.002614"
+        iyz="0.000055"
+        izz="0.002057" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/HEAD.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://WA1_400L/meshes/HEAD.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Neck_Y"
+    type="revolute">
+    <origin
+      xyz="0 0 0.042"
+      rpy="0 0 0" />
+    <parent
+      link="NECK" />
+    <child
+      link="HEAD" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-0.1693"
+      upper="0.6056"
+      effort="7"
+      velocity="3.66" />
+  </joint>
+</robot>
