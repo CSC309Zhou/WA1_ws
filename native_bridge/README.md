@@ -182,12 +182,14 @@ AprilTag ID 0 的桥接话题、坐标系、固定关节条件和 PC 订阅校�
 | 类别 | PC ROS2 端点 | 类型 |
 |---|---|---|
 | 12 轴反馈 | `/hand/joint_states` | `sensor_msgs/msg/JointState`；左手六轴后接右手六轴，位置单位弧度。 |
-| 指尖压力 | `/hand/finger_pressures/{left,right}` | `hand/msg/PressureSensor`；各六个原始值。 |
+| 指尖力反馈 | `/hand/finger_pressures/{left,right}` | `hand/msg/PressureSensor`。 |
 | 关节位置 | `/hand/joint_switch/{left,right,dual}` | `hand/srv/HandJoint`；请求 `float32[] q`，返回 `success/message`。 |
 | 手势 | `/hand/gesture_switch/{left,right,dual}` | `hand/srv/Gesture`；请求 `string[] gesture_name`。 |
 | 压力标零 | `/hand/finger_pressures/{left,right}/zero` | `std_srvs/srv/Trigger`。 |
 
-手关节和左右压力在真机约以 200 Hz 发布。`joint_states.velocity` 当前为空；`effort` 的物理含义尚未从官方接口确认。教程与机器人安装的消息注释对六个压力通道的顺序描述不同，桥保留原始数组，不重排或命名。手部服务响应表示调用结果；是否到达目标位置应查看后续关节反馈。当前 PICO 关闭腕部六维力传感器，因此本版未桥接腕力话题和标零服务。
+手关节和左右指尖力在真机约以 200 Hz 发布。关节顺序、位置范围及指尖力的单位与通道说明统一见 [hand 接口文档](../src/hand/README.md)。
+
+`joint_states.velocity` 当前为空；`effort` 的物理含义尚未从官方接口确认。手部服务响应表示调用结果；是否到达目标位置应查看后续关节反馈。当前 PICO 关闭腕部六维力传感器，因此本版未桥接腕力话题和标零服务。
 
 手部桥与上肢桥在同一个容器、同一个启动入口中运行。上肢流命令看门狗只管理上肢流命令，不会因手部服务调用而启动。
 
