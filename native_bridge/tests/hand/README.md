@@ -51,3 +51,7 @@ python3 native_bridge/tests/hand/manual_single_joint.py --side left --joint INDE
 确认目标后，在命令末尾添加 `--execute`，脚本会读取该手另外五个关节的当前角度，只调用一次 `/hand/joint_switch/left`，并打印服务响应及之后的关节反馈。右手使用 `--side right`。`--target` 的单位是弧度，F5D6-P 关节位置范围见 [关节顺序与位置范围](../../../src/hand/README.md#关节顺序与位置范围)。
 
 手势和压力标零服务的接口列表见 [桥接说明](../../README.md#灵巧手接口)。
+
+## 四指持续力闭环
+
+力控、键盘开合及退出复位说明见 [force_control](force_control/README.md)。
