@@ -4,13 +4,7 @@
 
 本目录仅保留通用入口 [servoj_single_joint.py](servoj_single_joint.py)，通过 `--joint-name` 选择 19 个上肢关节之一；关节分组和保守测试范围取自 [joint_config.py](../joint_config.py)。每次只改变所选关节，所属部位的其余关节保持开始时的实测位置；不使用 `whole_body`。原左腕测试改用 `--joint-name Wrist_Z_L`，其余轨迹参数和结果格式不变。
 
-| 部位 | `--joint-name` 可选值 | ServoJ 话题 | `arm_type` |
-|---|---|---|---:|
-| 左臂 | `Shoulder_Y_L, Shoulder_X_L, Shoulder_Z_L, Elbow_L, Wrist_Z_L, Wrist_Y_L, Wrist_X_L` | `/cmd/upperlimb/servoj/left_arm` | 1 |
-| 右臂 | `Shoulder_Y_R, Shoulder_X_R, Shoulder_Z_R, Elbow_R, Wrist_Z_R, Wrist_Y_R, Wrist_X_R` | `/cmd/upperlimb/servoj/right_arm` | 2 |
-| 颈部 | `Neck_Z, Neck_Y` | `/cmd/upperlimb/servoj/neck` | 4 |
-| 腰部 | `Waist_Z, Waist_Y` | `/cmd/upperlimb/servoj/waist` | 8 |
-| 升降 | `Lifting_Z` | `/cmd/upperlimb/servoj/lifting` | 16 |
+关节名称、部位后缀和 `arm_type` 见[公共关节表](../README.md#关节分组)。ServoJ 话题为 `/cmd/upperlimb/servoj/<部位后缀>`。
 
 `--duration` 必须是有限且严格大于 0.1 秒的运动时长；`--delta` 是有限的有符号相对位移。旋转轴使用 rad、rad/s，规划匀速段的峰值速度上限是 5 rad/s；`Lifting_Z` 使用 m、m/s，峰值速度上限是 0.05 m/s。目标位置范围沿用所附 WA1 URDF 与遥操作教程示例范围的交集，不代表当前控制器真实保护阈值。通用入口按约 200 Hz 发布，运动前后各有 0.2/0.3 秒定点段，两端各占运动时长的 10% 用于加减速，中间 80% 匀速。理论峰值速度为 `|delta| / [duration × 0.9]`，理论峰值加速度为 `峰值速度 / [duration × 0.1]`；提高频率不会降低这两个理论值。
 

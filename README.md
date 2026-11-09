@@ -55,7 +55,7 @@ export ROS_DOMAIN_ID=0
 source native_bridge/setup_pc.bash
 ```
 
-这个脚本已包含 ROS2 Humble、工作空间接口和 PC Fast DDS 配置，无需再单独执行 `source install/setup.bash`。它保留事先设置的 `ROS_DOMAIN_ID`；真机与桥容器的默认 domain 都是 0。PICO4 回放使用独立的 domain 85。
+这个脚本已包含 ROS2 Humble、工作空间接口和 PC Fast DDS 配置，无需再单独执行 `source install/setup.bash`。它使用 `rmw_fastrtps_cpp` 和 Fast DDS 回环传输，并保留事先设置的 `ROS_DOMAIN_ID`；客户端 domain 须与桥的 `--domain` 相同，真机默认是 0。PICO4 回放使用独立的 domain 85。
 
 ## 构建 PC 桥镜像
 
@@ -74,13 +74,7 @@ python3 native_bridge/bridge.py build
 
 ## 运行与验证
 
-启动桥前先核对有线连接。`ip route get` 的 `dev` 应为连接机器人的有线网卡，`src` 应与桥使用的 PC 地址一致；桥默认地址为 `192.168.217.10`。当前现场 ROS1 Master 使用 `192.168.217.1`，机器人 Pico 使用 `192.168.217.66`，Jetson 的 `eno1` 实测为 `192.168.217.100`。
-
-```bash
-ip -br address
-ip route get 192.168.217.1
-ip route get 192.168.217.66
-```
+先按[桥接文档的有线网络检查](native_bridge/README.md#有线网络检查)核对地址和路由。
 
 桥接容器的启动、查看与关闭无需 `source`：
 
@@ -96,13 +90,10 @@ PICO4 独立接入和浏览器可视化见 [`pico4_ros2` 说明](src/pico4_ros2/
 
 ## 本地查看头部相机
 
-`head_camera_viewer` 在 PC 浏览器中同时显示头部 D435i 的彩色图像和伪彩色对齐深度图；侧边栏显示各路接收帧率、分辨率、最新帧时间等信息。它直接连接 Jetson 的 ROSBridge，当前默认有线地址为 `192.168.217.100:9090`。运行前确保 PC 有线网络已连接，Jetson 的传感器与 ROSBridge 服务正在运行。查看器无需启动桥容器、编译 ROS2 软件包或加载 ROS2 环境。
-
-已有 `.venv` 时，在工作空间根目录首次安装依赖（已安装则跳过第一行），再启动查看器：
+`head_camera_viewer` 在浏览器显示头部相机的彩色与对齐深度图，无需加载 ROS2 环境或启动桥。先按[查看器说明](head_camera_viewer/README.md#准备)准备依赖和机器人端服务，再运行：
 
 ```bash
-.venv/bin/python -m pip install -r head_camera_viewer/requirements.txt
 .venv/bin/python head_camera_viewer/head_camera_viewer.py
 ```
 
-浏览器打开 `http://127.0.0.1:8767`；在启动终端按 `Ctrl+C` 关闭。没有 `.venv` 时的创建命令，以及修改 Jetson 地址、网页端口和深度显示范围的方法，见 [`head_camera_viewer` 详细说明](head_camera_viewer/README.md)。
+网页地址、参数和故障排查见[查看器说明](head_camera_viewer/README.md)。

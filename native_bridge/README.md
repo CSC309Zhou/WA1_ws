@@ -21,7 +21,7 @@ flowchart LR
 3. 状态话题使用 BestEffort、KeepLast(1)；下行流命令使用 Reliable、KeepLast(1)。桥保留机器人消息时间戳，并发布链路状态 `/upperlimb/bridge/status`。
 4. 流命令检查维度、数值、命令时间、反馈新鲜度和占用状态。已发送的流在 150 ms 内没有新有效指令时，桥设置 `stream_fault` 并调用上肢停止服务。`/upperlimb/bridge/reset_fault` 用于清除桥内的流故障锁存。
 
-当前现场有线配置为：PC `192.168.217.10`，ROS1 Master `192.168.217.1:11311`，机器人 Pico `192.168.217.66`。容器使用 host 网络与 IPC；PC 上的 ROS2 节点通过本机 DDS 与桥通信。
+容器使用 host 网络与 IPC；主机地址和覆盖参数见下文[启动参数](#启动查看与关闭)。
 
 ## 源码与镜像
 
@@ -67,7 +67,7 @@ ip route get 192.168.217.1
 ip route get 192.168.217.66
 ```
 
-路由输出中的 `dev` 应是连接机器人的有线网卡，`src` 应是机器人能访问的 PC 有线地址。`bridge.py start` 默认将 `ROS_IP` 设为 `192.168.217.10`；如果这台 PC 的实际地址不同，启动时用 `--pc-ip` 指定实际地址。`ROS_MASTER_URI` 默认是 `http://192.168.217.1:11311`，机器人 Pico 的默认地址为 `192.168.217.66`。PICO4 的 Wi-Fi 数据正常不代表这条有线链路正常。
+路由输出中的 `dev` 应是连接机器人的有线网卡，`src` 应是机器人能访问的 PC 有线地址，并与启动参数 `--pc-ip` 一致；地址不同则显式覆盖。各主机默认地址见下方参数表。PICO4 的 Wi-Fi 数据正常不代表这条有线链路正常。
 
 ## 启动、查看与关闭
 
@@ -96,7 +96,7 @@ python3 native_bridge/bridge.py stop
 
 ## 查看 ROS2 数据
 
-在每个运行 ROS2 CLI 或 Python 客户端的新终端，先设真机 domain 0，再加载工作空间及 PC DDS 环境。`setup_pc.bash` 保留事先设置的 `ROS_DOMAIN_ID`；在已启动的进程之后执行 `source` 不会改变该进程的环境。
+每个客户端终端先按[工作空间环境约定](../README.md#命令运行前的环境)设置 domain 和 DDS 环境，再查询：
 
 ```bash
 export ROS_DOMAIN_ID=0
@@ -116,7 +116,7 @@ ros2 topic echo --once --qos-reliability best_effort /perception/apriltag/tag0/d
 
 `/upperlimb/bridge/status` 以 JSON 提供 `feedback_ready`、`stream_fault`、`state_count`、`sent`、`dropped` 和 ROS1 命令连接数。19 轴状态约以 200 Hz 更新；旋转关节以弧度表示，`Lifting_Z` 以米表示。PC 客户端按 `JointState.name` 查找关节。TCP 位姿使用位置与四元数；位置坐标基于机器人 BASE。
 
-`setup_pc.bash` 加载工作区消息定义，设置 Fast DDS 回环传输和 `rmw_fastrtps_cpp`。PC 客户端的 domain 与桥启动时的 `--domain` 相同；`topic list` 只查看话题发现信息，`topic echo` 才在当前终端建立订阅并接收消息。高频状态话题采用 BestEffort，因此上面的 `echo` 显式选择相同可靠性。切换 ROS2 环境后需要即时重新发现话题时，可加 `--no-daemon`。
+`topic list` 只查看话题发现信息，`topic echo` 才建立订阅并接收消息。高频状态话题采用 BestEffort，因此上面的 `echo` 显式选择相同可靠性。发现结果异常时，按下节比较 daemon 与直接发现的结果。
 
 ## 故障排查：桥在运行，但本机看不到话题
 
@@ -130,7 +130,7 @@ ros2 topic list --no-daemon -t
 ros2 topic list -t
 ```
 
-`setup_pc.bash` 保留已有的 `ROS_DOMAIN_ID`，所以先前为 PICO4 回放设置的 domain 85 不会因 `source` 自动变回 0。`--no-daemon` 让本次命令按当前终端环境直接发现话题；普通 `topic list` 使用已经运行的 ROS2 daemon。daemon 是独立进程，之后在终端执行 `source` 不会更新它的环境或发现结果。
+`--no-daemon` 按当前终端环境直接发现话题；普通 `topic list` 使用独立运行的 ROS2 daemon，终端重新加载环境不会更新 daemon。上面的显式 domain 设置也避免沿用 PICO4 回放环境。
 
 如果 `--no-daemon` 能看到 `/upperlimb/joint_states`，普通列表却看不到，重启**本机 ROS2 daemon** 后复查：
 
@@ -141,8 +141,6 @@ ros2 topic echo --no-daemon --once --qos-reliability best_effort \
   /upperlimb/joint_states sensor_msgs/msg/JointState --field name
 ```
 
-这次现场故障正是这种情况：`--no-daemon` 能发现约 30 个上肢与手部话题并收到关节状态，普通列表只显示系统话题；停止 daemon 后普通列表恢复。旧 daemon 为何失去发现结果尚未确定。
-
 如果两个列表都看不到桥的话题，继续检查桥容器配置、PC 有线地址与机器人 ROS1 Master 路由：
 
 ```bash
@@ -151,7 +149,7 @@ python3 native_bridge/bridge.py logs
 ip route get 192.168.217.1
 ```
 
-桥默认使用 domain 0、PC 有线地址 `192.168.217.10` 和 ROS1 Master `192.168.217.1:11311`；这些值应与当前网络和查询终端一致。话题出现在列表中仅表示发现成功，是否持续传输仍需用 `topic echo` 验证。
+核对[启动参数](#启动查看与关闭)中的地址、domain 与当前网络和客户端环境是否一致，再用上面的 `topic echo` 确认数据接收。
 
 ## 主要接口
 
@@ -205,20 +203,7 @@ python3 native_bridge/tests/run_mock_test.py --seconds 3
 
 灵巧手真机只读检查与单手位置控制入口见 [手部测试说明](tests/hand/README.md)。机器人上肢状态和安全锁查询见 [`wa1_robot_state`](../src/wa1_robot_state/README.md)。
 
-真机测试先在终端 A 启动桥：
-
-```bash
-python3 native_bridge/bridge.py start
-```
-
-终端 B 加载 PC ROS2 环境：
-
-```bash
-export ROS_DOMAIN_ID=0
-source native_bridge/setup_pc.bash
-```
-
-在终端 B 选择一类测试，先运行下面的预览命令；在同一条命令末尾加 `--execute` 即执行对应控制请求：
+真机测试先按[启动说明](#启动查看与关闭)启动桥，在另一个终端按[查看 ROS2 数据](#查看-ros2-数据)加载客户端环境。下面是各类预览示例；现场确认后，在同一条命令末尾添加 `--execute` 才发送控制请求。公共关节表及全部模块入口见[测试索引](tests/README.md)。
 
 | 测试 | 预览命令 | 输出 |
 |---|---|---|
