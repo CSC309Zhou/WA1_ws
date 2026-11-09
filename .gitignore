@@ -15,7 +15,6 @@ htmlcov/
 # Generated experiment output; source fixtures remain tracked
 **/results/
 /native_bridge/results/
-MUJOCO_LOG.TXT
 *.pcap
 *.bag
 *.db3
@@ -28,9 +27,5 @@ MUJOCO_LOG.TXT
 *~
 .DS_Store
 
-# Local documentation outputs; version the current cleanup plan and report
+# Local documentation outputs
 docs/
-!/docs/
-/docs/*
-!/docs/CODE_ORGANIZATION_PLAN.md
-!/docs/REDUNDANCY_REVIEW_2026-11-09.md
