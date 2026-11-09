@@ -7,7 +7,6 @@ log
 src/pico4_ros2
 src/wa1_pico4_teleop
 src/wa1_description
-native_bridge/evidence
 native_bridge/results
 native_bridge/tests
 native_bridge/docs

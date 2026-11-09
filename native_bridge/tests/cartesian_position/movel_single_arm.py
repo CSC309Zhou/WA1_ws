@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Preview or send one left-arm MoveL target in the BASE Cartesian frame.
+"""Preview or send one single-arm MoveL target in the BASE Cartesian frame.
 
 Input is six-dimensional: xyz in metres and fixed-axis XYZ RPY in radians.
 The wire request uses geometry_msgs/Pose (xyz plus quaternion). Only --execute
@@ -10,14 +10,19 @@ import argparse
 import json
 import math
 import os
+import sys
+from pathlib import Path
 import time
 
 
-LEFT_JOINTS = (
-    'Shoulder_Y_L', 'Shoulder_X_L', 'Shoulder_Z_L', 'Elbow_L',
-    'Wrist_Z_L', 'Wrist_Y_L', 'Wrist_X_L',
-)
+# Resolve shared joint metadata independently of the caller current directory.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from joint_config import PARTS  # noqa: E402
+
 MASTER = os.environ.get('WA1_ROS1_MASTER_URI', 'http://192.168.217.1:11311').rstrip('/')
+
+LEFT_JOINTS = PARTS['left_arm'][0]
+RIGHT_JOINTS = PARTS['right_arm'][0]
 
 
 def quat_unit(q):
@@ -100,6 +105,8 @@ def make_target(current_tcp, args, pose_type):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--side', required=True, choices=('left', 'right'),
+                        help='Arm to control')
     target = parser.add_mutually_exclusive_group(required=True)
     target.add_argument('--delta', nargs=6, type=float,
                         metavar=('DX', 'DY', 'DZ', 'DROLL', 'DPITCH', 'DYAW'),
@@ -115,6 +122,9 @@ def main():
     action.add_argument('--check-only', action='store_true',
                         help='Check live execution prerequisites without sending a MoveL request')
     args = parser.parse_args()
+    side = args.side
+    other = 'right' if side == 'left' else 'left'
+    joints = LEFT_JOINTS if side == 'left' else RIGHT_JOINTS
     six = args.delta if args.delta is not None else args.absolute
     if not all(math.isfinite(v) for v in six):
         parser.error('All six Cartesian inputs must be finite')
@@ -133,7 +143,7 @@ def main():
     from upperlimb.srv import MoveL
 
     rclpy.init()
-    node = rclpy.create_node('wa1_left_arm_movel_operator')
+    node = rclpy.create_node(f'wa1_{side}_arm_movel_operator')
     latest = {}
     subscriptions = []
     qos = QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT)
@@ -171,8 +181,8 @@ def main():
         if len(state.name) != 19 or len(state.position) != 19 or len(set(state.name)) != 19:
             raise RuntimeError('Expected 19 unique joint names and positions')
         values['joints'] = dict(zip(state.name, state.position))
-        if any(name not in values['joints'] for name in LEFT_JOINTS):
-            raise RuntimeError('Left-arm feedback is incomplete')
+        if any(name not in values['joints'] for name in joints):
+            raise RuntimeError(f'{side.title()}-arm feedback is incomplete')
         if not all(math.isfinite(v) for v in state.position):
             raise RuntimeError('JointState contains a non-finite position')
         return values
@@ -180,21 +190,21 @@ def main():
     def build_request(feedback, target_pose):
         request = MoveL.Request()
         write_pose(request.pose[0], *pose_values(target_pose))
-        # The left_arm endpoint uses pose[0]. Keep the other fixed array entry
-        # at the current right TCP instead of leaving a zero quaternion.
-        write_pose(request.pose[1], *pose_values(feedback['right'], feedback=True))
+        # Either single-arm endpoint uses pose[0]. Fill pose[1] with the
+        # other arm current TCP instead of leaving a zero quaternion.
+        write_pose(request.pose[1], *pose_values(feedback[other], feedback=True))
         request.v, request.acc, request.is_async = args.v, args.acc, False
         return request
 
     def report(mode, feedback, request):
         return {
-            'mode': mode, 'service': '/upperlimb/movel/left_arm',
+            'mode': mode, 'service': f'/upperlimb/movel/{side}_arm',
             'input_kind': 'BASE_frame_delta' if args.delta is not None else 'absolute_BASE_pose',
             'input_xyz_m_and_rpy_rad': six,
-            'current_left_tcp': pose_json(feedback['left'], feedback=True),
-            'target_left_tcp_pose_0': pose_json(request.pose[0]),
-            'right_current_pose_1_unused': pose_json(request.pose[1]),
-            'target_change': error_to(request.pose[0], feedback['left'], True),
+            f'current_{side}_tcp': pose_json(feedback[side], feedback=True),
+            f'target_{side}_tcp_pose_0': pose_json(request.pose[0]),
+            f'{other}_current_pose_1_unused': pose_json(request.pose[1]),
+            'target_change': error_to(request.pose[0], feedback[side], True),
             'v': args.v, 'acc': args.acc, 'is_async': False,
             'upperlimb_mode': [int(feedback['mode'].cmd_num), feedback['mode'].cmd_name],
             'occupancy': int(feedback['occupancy'].data),
@@ -208,7 +218,7 @@ def main():
         while time.monotonic() < deadline and len(latest) < 6:
             rclpy.spin_once(node, timeout_sec=0.05)
         feedback = snapshot()
-        target_pose = make_target(feedback['left'], args, GeometryPose)
+        target_pose = make_target(feedback[side], args, GeometryPose)
         request = build_request(feedback, target_pose)
         mode = 'EXECUTE_ONCE' if args.execute else 'CHECK_ONLY' if args.check_only else 'PREVIEW_ONLY'
         print(json.dumps(report(mode,
@@ -219,9 +229,9 @@ def main():
 
         if os.environ.get('ROS_DOMAIN_ID', '0') != '0':
             raise RuntimeError('--execute and --check-only require the real PC DDS domain 0')
-        client = node.create_client(MoveL, '/upperlimb/movel/left_arm')
+        client = node.create_client(MoveL, f'/upperlimb/movel/{side}_arm')
         if not client.wait_for_service(timeout_sec=5.0):
-            raise RuntimeError('Left-arm MoveL service is unavailable')
+            raise RuntimeError(f'{side.title()}-arm MoveL service is unavailable')
         rclpy.spin_once(node, timeout_sec=0.05)
         feedback = snapshot()
         status = feedback['status']
@@ -247,19 +257,19 @@ def main():
         if node.count_publishers('/upperlimb/bridge/status') != 1:
             raise RuntimeError('Expected exactly one PC bridge')
         # Recompute relative target from the latest TCP immediately before use.
-        target_pose = make_target(feedback['left'], args, GeometryPose)
+        target_pose = make_target(feedback[side], args, GeometryPose)
         request = build_request(feedback, target_pose)
         if args.check_only:
             print(json.dumps({'preflight': 'PASSED', 'request_sent': False,
-                              'service': '/upperlimb/movel/left_arm',
-                              'pose_0_left_target': pose_json(request.pose[0]),
-                              'pose_1_right_current_unused': pose_json(request.pose[1]),
+                              'service': f'/upperlimb/movel/{side}_arm',
+                              f'pose_0_{side}_target': pose_json(request.pose[0]),
+                              f'pose_1_{other}_current_unused': pose_json(request.pose[1]),
                               'v': request.v, 'acc': request.acc,
                               'is_async': request.is_async}, indent=2), flush=True)
             return 0
-        print(json.dumps({'sending_once_to': '/upperlimb/movel/left_arm',
-                          'pose_0_left_target': pose_json(request.pose[0]),
-                          'pose_1_right_current_unused': pose_json(request.pose[1]),
+        print(json.dumps({'sending_once_to': f'/upperlimb/movel/{side}_arm',
+                          f'pose_0_{side}_target': pose_json(request.pose[0]),
+                          f'pose_1_{other}_current_unused': pose_json(request.pose[1]),
                           'v': request.v, 'acc': request.acc,
                           'is_async': request.is_async}, indent=2), flush=True)
         future = client.call_async(request)
@@ -276,12 +286,12 @@ def main():
             rclpy.spin_once(node, timeout_sec=0.05)
         observed = snapshot()
         print(json.dumps({
-            'observed_left_tcp': pose_json(observed['left'], feedback=True),
-            'target_left_tcp': pose_json(target_pose),
-            'tcp_error': error_to(target_pose, observed['left'], True),
-            'left_joint_delta_rad': {
+            f'observed_{side}_tcp': pose_json(observed[side], feedback=True),
+            f'target_{side}_tcp': pose_json(target_pose),
+            'tcp_error': error_to(target_pose, observed[side], True),
+            f'{side}_joint_delta_rad': {
                 name: observed['joints'][name] - feedback['joints'][name]
-                for name in LEFT_JOINTS},
+                for name in joints},
         }, ensure_ascii=False, indent=2))
         return 0
     except KeyboardInterrupt:
@@ -290,6 +300,7 @@ def main():
     finally:
         node.destroy_node()
         rclpy.shutdown()
+
 
 
 if __name__ == '__main__':

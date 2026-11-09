@@ -28,5 +28,9 @@ MUJOCO_LOG.TXT
 *~
 .DS_Store
 
-# Doc Outputs
+# Local documentation outputs; version the current cleanup plan and report
 docs/
+!/docs/
+/docs/*
+!/docs/CODE_ORGANIZATION_PLAN.md
+!/docs/REDUNDANCY_REVIEW_2026-11-09.md

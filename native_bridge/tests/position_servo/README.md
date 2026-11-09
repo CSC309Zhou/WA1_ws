@@ -2,23 +2,24 @@
 
 `latency/` 中另有基于同一轨迹和收尾流程的 `Wrist_Z_L` 延迟探针，使用前先阅读 [延迟探针说明](latency/README.md)。
 
-本目录有 19 个 `manual_<joint>.py` 入口，覆盖双臂各 7 轴、头部 2 轴、腰部 2 轴和升降 1 轴。它们共用 `servoj_single_joint.py`，每次只改变所选关节，所属部位的其余关节保持开始时的实测位置；不使用 `whole_body`。原有 `manual_wrist_z_l.py` 的参数和结果格式保持兼容。
+本目录仅保留通用入口 [servoj_single_joint.py](servoj_single_joint.py)，通过 `--joint-name` 选择 19 个上肢关节之一；关节分组和保守测试范围取自 [joint_config.py](../joint_config.py)。每次只改变所选关节，所属部位的其余关节保持开始时的实测位置；不使用 `whole_body`。原左腕测试改用 `--joint-name Wrist_Z_L`，其余轨迹参数和结果格式不变。
 
-| 部位 | 入口文件（均位于本目录） | ServoJ 话题 | `arm_type` |
-| --- | --- | --- | ---: |
-| 左臂 | `manual_shoulder_y_l.py`, `manual_shoulder_x_l.py`, `manual_shoulder_z_l.py`, `manual_elbow_l.py`, `manual_wrist_z_l.py`, `manual_wrist_y_l.py`, `manual_wrist_x_l.py` | `/cmd/upperlimb/servoj/left_arm` | 1 |
-| 右臂 | `manual_shoulder_y_r.py`, `manual_shoulder_x_r.py`, `manual_shoulder_z_r.py`, `manual_elbow_r.py`, `manual_wrist_z_r.py`, `manual_wrist_y_r.py`, `manual_wrist_x_r.py` | `/cmd/upperlimb/servoj/right_arm` | 2 |
-| 头部 | `manual_neck_z.py`, `manual_neck_y.py` | `/cmd/upperlimb/servoj/neck` | 4 |
-| 腰部 | `manual_waist_z.py`, `manual_waist_y.py` | `/cmd/upperlimb/servoj/waist` | 8 |
-| 升降 | `manual_lifting_z.py` | `/cmd/upperlimb/servoj/lifting` | 16 |
+| 部位 | `--joint-name` 可选值 | ServoJ 话题 | `arm_type` |
+|---|---|---|---:|
+| 左臂 | `Shoulder_Y_L, Shoulder_X_L, Shoulder_Z_L, Elbow_L, Wrist_Z_L, Wrist_Y_L, Wrist_X_L` | `/cmd/upperlimb/servoj/left_arm` | 1 |
+| 右臂 | `Shoulder_Y_R, Shoulder_X_R, Shoulder_Z_R, Elbow_R, Wrist_Z_R, Wrist_Y_R, Wrist_X_R` | `/cmd/upperlimb/servoj/right_arm` | 2 |
+| 颈部 | `Neck_Z, Neck_Y` | `/cmd/upperlimb/servoj/neck` | 4 |
+| 腰部 | `Waist_Z, Waist_Y` | `/cmd/upperlimb/servoj/waist` | 8 |
+| 升降 | `Lifting_Z` | `/cmd/upperlimb/servoj/lifting` | 16 |
 
-`--duration` 必须是有限且严格大于 0.1 秒的运动时长；`--delta` 是有限的有符号相对位移。旋转轴使用 rad、rad/s，规划匀速段的峰值速度上限是 5 rad/s；`Lifting_Z` 使用 m、m/s，峰值速度上限是 0.05 m/s。目标位置范围沿用所附 WA1 URDF 与遥操作教程示例范围的交集，不代表当前控制器真实保护阈值。所有入口按约 200 Hz 发布，运动前后各有 0.2/0.3 秒定点段，两端各占运动时长的 10% 用于加减速，中间 80% 匀速。理论峰值速度为 `|delta| / [duration × 0.9]`，理论峰值加速度为 `峰值速度 / [duration × 0.1]`；提高频率不会降低这两个理论值。
+`--duration` 必须是有限且严格大于 0.1 秒的运动时长；`--delta` 是有限的有符号相对位移。旋转轴使用 rad、rad/s，规划匀速段的峰值速度上限是 5 rad/s；`Lifting_Z` 使用 m、m/s，峰值速度上限是 0.05 m/s。目标位置范围沿用所附 WA1 URDF 与遥操作教程示例范围的交集，不代表当前控制器真实保护阈值。通用入口按约 200 Hz 发布，运动前后各有 0.2/0.3 秒定点段，两端各占运动时长的 10% 用于加减速，中间 80% 匀速。理论峰值速度为 `|delta| / [duration × 0.9]`，理论峰值加速度为 `峰值速度 / [duration × 0.1]`；提高频率不会降低这两个理论值。
 
-在 PC 的 WA1 根目录预览一个关节，例如：
+以下命令在工作空间根目录执行；先按[桥接说明](../../README.md#启动查看与关闭)启动桥，再预览一个关节：
 
 ```bash
-source WA1_ws/native_bridge/setup_pc.bash
-python3 WA1_ws/native_bridge/tests/position_servo/manual_neck_y.py \
+export ROS_DOMAIN_ID=0
+source native_bridge/setup_pc.bash
+python3 native_bridge/tests/position_servo/servoj_single_joint.py --joint-name Neck_Y \
   --duration 1 --delta 0.01
 ```
 

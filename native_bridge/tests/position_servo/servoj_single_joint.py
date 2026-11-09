@@ -8,9 +8,15 @@ import math
 import os
 from pathlib import Path
 import statistics
+import sys
 import tempfile
 import threading
 import time
+
+
+# Direct scripts and the latency entry must resolve the same test metadata.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from joint_config import PARTS, TARGET_LIMITS  # noqa: E402
 
 
 MASTER = os.environ.get('WA1_ROS1_MASTER_URI', 'http://192.168.217.1:11311').rstrip('/')
@@ -18,41 +24,6 @@ RATE_HZ = 200
 RAMP = 0.1
 PRE_HOLD_S = 0.2
 POST_HOLD_S = 0.3
-
-# Keep ServoJ vectors in the same part order as MoveJ; never use JointState indices.
-PARTS = {
-    'left_arm': (('Shoulder_Y_L', 'Shoulder_X_L', 'Shoulder_Z_L', 'Elbow_L',
-                  'Wrist_Z_L', 'Wrist_Y_L', 'Wrist_X_L'), 1),
-    'right_arm': (('Shoulder_Y_R', 'Shoulder_X_R', 'Shoulder_Z_R', 'Elbow_R',
-                   'Wrist_Z_R', 'Wrist_Y_R', 'Wrist_X_R'), 2),
-    'neck': (('Neck_Z', 'Neck_Y'), 4),
-    'waist': (('Waist_Z', 'Waist_Y'), 8),
-    'lifting': (('Lifting_Z',), 16),
-}
-
-# Supplied URDF and teleoperation-guide example bounds intersection; controller
-# limits have not been verified. Lifting_Z uses metres; all other axes use rad.
-TARGET_LIMITS = {
-    'Shoulder_Y_L': (-3.197, 1.145),
-    'Shoulder_X_L': (0.0, 3.026),
-    'Shoulder_Z_L': (-2.83, 2.83),
-    'Elbow_L': (-2.0, 0.07),
-    'Wrist_Z_L': (-2.855, 2.855),
-    'Wrist_Y_L': (-1.487, 1.2566),
-    'Wrist_X_L': (-1.487, 1.487),
-    'Shoulder_Y_R': (-3.197, 1.145),
-    'Shoulder_X_R': (-3.026, 0.0),
-    'Shoulder_Z_R': (-2.83, 2.83),
-    'Elbow_R': (-2.0, 0.07),
-    'Wrist_Z_R': (-2.855, 2.855),
-    'Wrist_Y_R': (-1.487, 1.2566),
-    'Wrist_X_R': (-1.487, 1.487),
-    'Neck_Z': (-0.733, 0.733),
-    'Neck_Y': (-0.1693, 0.6),
-    'Waist_Z': (-2.018, 3.0892),
-    'Waist_Y': (-0.478, 0.733),
-    'Lifting_Z': (0.002, 0.206),
-}
 
 
 @dataclass(frozen=True)
@@ -331,31 +302,34 @@ def save_result(report, stem, spec):
     return data_path, image_path
 
 
-def main(joint_name, *, latency_probe=False):
+def main(joint_name=None, *, latency_probe=False):
     if latency_probe and joint_name != 'Wrist_Z_L':
         raise ValueError('The current latency probe is for Wrist_Z_L only')
     if latency_probe:
         from latency.probe import LatencyCapture
+    parser = argparse.ArgumentParser(description=__doc__)
+    if joint_name is None:
+        parser.add_argument('--joint-name', required=True, choices=tuple(TARGET_LIMITS),
+                            help='Joint to move; all other axes keep their starting positions')
+    parser.add_argument('--duration', required=True, type=float,
+                        help='Movement duration in seconds, strictly greater than 0.1')
+    parser.add_argument('--delta', required=True, type=float,
+                        help='Signed relative displacement: rad for rotation, m for Lifting_Z')
+    parser.add_argument('--execute', action='store_true',
+                        help='Actually configure ServoJ and publish to the real robot')
+    parser.add_argument('--output-dir', type=Path,
+                        default=(Path(__file__).resolve().parent /
+                                 ('latency/results' if latency_probe else 'results')),
+                        help='PC results root; latest files are overwritten in the selected joint subfolder')
+    args = parser.parse_args()
+    if joint_name is None:
+        joint_name = args.joint_name
     spec = spec_for(joint_name)
     start_key = spec.key('start')
     target_key = spec.key('target')
     delta_key = spec.key('delta')
     speed_key = f'planned_peak_speed_{spec.unit}_s'
     accel_key = f'planned_peak_accel_{spec.unit}_s2'
-    parser = argparse.ArgumentParser(
-        description=f'{spec.name} ServoJ trajectory test; preview by default.')
-    parser.add_argument('--duration', required=True, type=float,
-                        help='Movement duration in seconds, strictly greater than 0.1')
-    parser.add_argument('--delta', required=True, type=float,
-                        help=f'Finite signed relative {spec.name} displacement in {spec.unit}; '
-                             f'planned peak speed <= {spec.max_peak_speed:g} {spec.unit}/s')
-    parser.add_argument('--execute', action='store_true',
-                        help='Actually configure ServoJ and publish to the real robot')
-    parser.add_argument('--output-dir', type=Path,
-                        default=(Path(__file__).resolve().parent /
-                                 ('latency/results' if latency_probe else 'results')),
-                        help=f'PC results root; latest files are overwritten in its {spec.name} subfolder')
-    args = parser.parse_args()
     if not math.isfinite(args.duration) or args.duration <= 0.1:
         parser.error('--duration must be finite and greater than 0.1 s')
     if not math.isfinite(args.delta):
@@ -621,3 +595,7 @@ def main(joint_name, *, latency_probe=False):
         if report['published']:
             print('Inspect bridge/status and cleanup fields; the next --execute will check and reset a latched stream fault.')
     return exit_code
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

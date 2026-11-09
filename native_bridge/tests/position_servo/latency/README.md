@@ -22,28 +22,29 @@
 
 ## PC 侧准备
 
-从 `~/WA1` 执行，重新构建 PC 桥镜像后启用诊断开关：
+以下命令均在工作空间根目录执行；重新构建 PC 桥镜像后启用诊断开关：
 
 ```bash
-python3 WA1_ws/native_bridge/bridge.py build
-python3 WA1_ws/native_bridge/bridge.py start --latency-probe
-source WA1_ws/native_bridge/setup_pc.bash
+python3 native_bridge/bridge.py build
+python3 native_bridge/bridge.py start --latency-probe
+export ROS_DOMAIN_ID=0
+source native_bridge/setup_pc.bash
 ros2 topic list --no-daemon -t | rg 'servoj_left_arm_timing|joint_receive_time|joint_states'
 ```
 
-如果 `start` 提示项目容器已经存在，先检查当前任务与容器状态；若现有控制任务正在运行，先结束任务并确认机器人停止，然后运行 `python3 WA1_ws/native_bridge/bridge.py stop` 移除项目容器，再执行上面的 `start`。`build`、`stop`、`start` 本身不发布关节目标。诊断开关固定在容器启动参数中；普通控制模式依旧默认关闭。
+如果 `start` 提示项目容器已经存在，先检查当前任务与容器状态；若现有控制任务正在运行，先结束任务并确认机器人停止，然后运行 `python3 native_bridge/bridge.py stop` 移除项目容器，再执行上面的 `start`。`build`、`stop`、`start` 本身不发布关节目标。诊断开关固定在容器启动参数中；普通控制模式依旧默认关闭。
 
 先预览指定相对位移和运动时长：
 
 ```bash
-python3 WA1_ws/native_bridge/tests/position_servo/latency/manual_wrist_z_l_latency.py \
+python3 native_bridge/tests/position_servo/latency/manual_wrist_z_l_latency.py \
   --duration 1 --delta 0.1
 ```
 
 预览只订阅实时反馈、生成轨迹和结果文件；不创建 ServoJ 发布者，也不调用控制服务。与原测试相同，`--duration` 必须严格大于 0.1 s，计划峰值速度不得超过 5 rad/s，目标须处于当前配置的位置范围。测试者现场确认方向、范围和机器人状态后，才手动追加 `--execute`：
 
 ```bash
-python3 WA1_ws/native_bridge/tests/position_servo/latency/manual_wrist_z_l_latency.py \
+python3 native_bridge/tests/position_servo/latency/manual_wrist_z_l_latency.py \
   --duration 1 --delta 0.1 --execute
 ```
 
@@ -54,7 +55,7 @@ python3 WA1_ws/native_bridge/tests/position_servo/latency/manual_wrist_z_l_laten
 只读 SSH 核查发现 Pico `naviai_wa_h_robot_node` 已在 `/home/nav01/zj_humanoid/logs/run.log.1` 中为每条左臂 ServoJ 回调写入带 Pico ROS 时间的目标值。Pico 的 `NTPSynchronized=no`，其壁钟与 PC 约有十秒偏移；**不能直接把 PC 时戳减去 Pico 时戳**。`pico_log.py` 只读提取实验窗口内的左臂日志，按目标值配对，再用同属 Pico 时间域的日志时戳与 `JointState.header.stamp` 求差：
 
 ```bash
-python3 WA1_ws/native_bridge/tests/position_servo/latency/pico_log.py --fetch
+python3 native_bridge/tests/position_servo/latency/pico_log.py --fetch
 ```
 
 若 SSH key 不可用，会提示输入 Pico 密码；密码经文件描述符交给 `sshpass`，不会写入脚本、命令行参数或结果。此机器官方文档标注 Pico 密码为单个空格。日志轮转后可用 `--remote-log /home/nav01/zj_humanoid/logs/run.log.2` 指定包含该次实验的文件；默认读取 `.1`。这一步**不需要再次运动**，可以对现有 `latest.json` 使用。结果保存在 `latest_pico_log.jsonl`、`latest_pico_analysis.json` 与 `latest_pico.png`。可用 `--local-log <已下载的 JSONL>` 完全离线重算。
@@ -67,7 +68,7 @@ python3 WA1_ws/native_bridge/tests/position_servo/latency/pico_log.py --fetch
 
 ```bash
 sudo -v
-python3 WA1_ws/native_bridge/tests/position_servo/latency/wire_capture.py --seconds 20
+python3 native_bridge/tests/position_servo/latency/wire_capture.py --seconds 20
 ```
 
 看到 `Capture ready` 后，现场操作者在终端 B 运行**已经确认安全**的延迟实验；如果只想检查抓包程序，可不运行运动测试，届时离线分析会报告没有配对的指令。抓包输出为 `latest_wire.pcap` 和 `latest_wire_clock.json`，均在 PC 的 `results/Wrist_Z_L` 中。脚本以普通用户保存文件；`sudo` 只用于启动 PC 的 `tcpdump`。抓包窗口要覆盖整段运动及其前后状态。
@@ -77,7 +78,7 @@ python3 WA1_ws/native_bridge/tests/position_servo/latency/wire_capture.py --seco
 同一次实验结束后，先运行 `pico_log.py --fetch` 更新该次 Pico 分析，再运行：
 
 ```bash
-python3 WA1_ws/native_bridge/tests/position_servo/latency/wire_analyze.py
+python3 native_bridge/tests/position_servo/latency/wire_analyze.py
 ```
 
 `wire_analyze.py` 离线重组 TCP 流，用移动段目标值的精确 double 位模式匹配 ROS1 `Joints` 帧，并用 `JointState.header.stamp` 匹配入站状态帧。它报告桥 ROS1 `publish()` 返回→PC 出站抓包、PC 入站抓包→桥 ROS1 回调，以及 PC 出站→入站的表观轨迹间隔。结合**同一次** Pico 日志，脚本给出两次网络传输及时间戳落点的合并余量；它不能精确分开两个单向网络延迟。输出为 `latest_wire_analysis.json` 与 `latest_wire.png`。分析会检查 Pico 结果是否属于同一次实验，并列出帧配对率、TCP 重组缺口及抓包时钟校准波动；配对不足时不要解释分位数。

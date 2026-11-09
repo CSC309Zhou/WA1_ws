@@ -18,7 +18,7 @@ python3 native_bridge/bridge.py start
 python3 native_bridge/bridge.py logs
 ```
 
-桥的网络配置与构建依赖见 [`native_bridge` 说明](../../native_bridge/README.md)。默认连接 `http://192.168.217.1:11311`，PC 地址为 `192.168.217.10`，ROS2 domain 为 `0`。地址不同时使用 `bridge.py start --master-uri ... --pc-ip ... --jetson-ip ...` 指定。
+构建依赖见 [`native_bridge` 说明](../../native_bridge/README.md)；网络默认值、各主机角色及地址覆盖参数统一见[桥参数说明](../../native_bridge/README.md#启动查看与关闭)。
 
 ## 读取位姿
 

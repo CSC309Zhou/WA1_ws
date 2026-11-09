@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Preview or run one finite left-arm ServoL TCP trajectory in BASE.
+"""Preview or run one finite single-arm ServoL TCP trajectory in BASE.
 
 Inputs are xyz metres and fixed-axis XYZ RPY radians. Only --execute calls
 servo services or publishes commands. Preview reads feedback and writes PC files.
@@ -9,6 +9,7 @@ import argparse
 import json
 import math
 import os
+import sys
 from pathlib import Path
 import statistics
 import tempfile
@@ -17,16 +18,17 @@ import time
 
 
 MASTER = os.environ.get('WA1_ROS1_MASTER_URI', 'http://192.168.217.1:11311').rstrip('/')
-COMMAND = '/cmd/upperlimb/servol/left_arm'
-ROS1_COMMAND = '/zj_humanoid/upperlimb/servol/left_arm'
 RATE_HZ = 200
 RAMP = 0.1
 PRE_HOLD_S = 0.2
 POST_HOLD_S = 0.3
-LEFT_JOINTS = ('Shoulder_Y_L', 'Shoulder_X_L', 'Shoulder_Z_L', 'Elbow_L',
-               'Wrist_Z_L', 'Wrist_Y_L', 'Wrist_X_L')
-RIGHT_JOINTS = ('Shoulder_Y_R', 'Shoulder_X_R', 'Shoulder_Z_R', 'Elbow_R',
-                'Wrist_Z_R', 'Wrist_Y_R', 'Wrist_X_R')
+
+# Resolve shared joint metadata independently of the caller current directory.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from joint_config import PARTS  # noqa: E402
+
+LEFT_JOINTS = PARTS['left_arm'][0]
+RIGHT_JOINTS = PARTS['right_arm'][0]
 
 
 def quat_unit(q):
@@ -129,7 +131,10 @@ def plan_for(start, delta, duration):
 
 
 class Feedback:
-    def __init__(self):
+    def __init__(self, side):
+        if side not in ('left', 'right'):
+            raise ValueError(f'Unknown arm side: {side}')
+        self.side = side
         self.lock = threading.Lock()
         self.latest = {}
         self.tcp_samples = []
@@ -151,7 +156,7 @@ class Feedback:
             return
         with self.lock:
             self.latest[key] = (pose, now)
-            if key == 'left':
+            if key == self.side:
                 self.tcp_samples.append({'pc_monotonic_ns': now, **pose})
 
     def on_joint(self, msg):
@@ -253,7 +258,7 @@ def reset_latched_fault(feedback, client, request):
                        f'last feedback error: {last_error}')
 
 
-def save_result(report, stem):
+def save_result(report, stem, side):
     data_path = stem.with_suffix('.json')
     data_path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
 
@@ -263,7 +268,7 @@ def save_result(report, stem):
     published = report['published']
     start_ns = report.get('move_start_pc_monotonic_ns')
     feedback = report['tcp_feedback_samples']
-    first_q = report.get('start_left_tcp', {}).get('quaternion_xyzw')
+    first_q = report.get(f'start_{side}_tcp', {}).get('quaternion_xyzw')
     for axis, label in enumerate(('X (m)', 'Y (m)', 'Z (m)', 'rotation from start (deg)')):
         ax = axes[axis]
         if axis < 3:
@@ -289,7 +294,7 @@ def save_result(report, stem):
         ax.axvline(report['duration_s'], color='0.6', linewidth=0.8)
     axes[0].legend(loc='best')
     axes[-1].set_xlabel('PC monotonic time relative to movement start (s)')
-    fig.suptitle(f"Left ServoL: delta={report['delta_xyz_m_rpy_rad']}, "
+    fig.suptitle(f"{side.title()} ServoL: delta={report['delta_xyz_m_rpy_rad']}, "
                  f"duration={report['duration_s']:g} s, {RATE_HZ} Hz ({report['mode']})")
     fig.tight_layout()
     plot_path = stem.with_suffix('.png')
@@ -300,6 +305,8 @@ def save_result(report, stem):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--side', required=True, choices=('left', 'right'),
+                        help='Arm to control')
     parser.add_argument('--duration', required=True, type=float,
                         help='Movement duration in seconds, strictly greater than 0.1')
     parser.add_argument('--delta', required=True, nargs=6, type=float,
@@ -308,9 +315,16 @@ def main():
     parser.add_argument('--execute', action='store_true',
                         help='Configure ServoL and publish the finite target stream')
     parser.add_argument('--output-dir', type=Path,
-                        default=Path(__file__).resolve().parent / 'results' / 'Left_TCP',
+                        default=None,
                         help='PC result directory; preview and latest files are separate')
     args = parser.parse_args()
+    side = args.side
+    if args.output_dir is None:
+        args.output_dir = Path(__file__).resolve().parent / 'results' / f'{side.title()}_TCP'
+    other = 'right' if side == 'left' else 'left'
+    arm_type = 1 if side == 'left' else 2
+    command = f'/cmd/upperlimb/servol/{side}_arm'
+    ros1_command = f'/zj_humanoid/upperlimb/servol/{side}_arm'
     if not math.isfinite(args.duration) or args.duration <= 0.1:
         parser.error('--duration must be finite and greater than 0.1 s')
     if not all(math.isfinite(x) for x in args.delta) or not any(x != 0 for x in args.delta):
@@ -337,8 +351,8 @@ def main():
     from upperlimb.srv import Servo
 
     rclpy.init()
-    node = rclpy.create_node('wa1_left_arm_servol_operator')
-    feedback = Feedback()
+    node = rclpy.create_node(f'wa1_{side}_arm_servol_operator')
+    feedback = Feedback(side)
     keep = []
     sensor_qos = QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT)
     for cls, topic, callback in (
@@ -359,7 +373,7 @@ def main():
 
     report = {
         'mode': 'EXECUTE' if args.execute else 'PREVIEW_ONLY',
-        'command_topic': COMMAND, 'ros1_command_topic': ROS1_COMMAND,
+        'command_topic': command, 'ros1_command_topic': ros1_command,
         'duration_s': args.duration, 'delta_xyz_m_rpy_rad': args.delta,
         'rate_hz': RATE_HZ, 'ramp_fraction': RAMP,
         'pre_hold_s': PRE_HOLD_S, 'post_hold_s': POST_HOLD_S,
@@ -374,19 +388,19 @@ def main():
         initial = wait_for_feedback(feedback)
         if node.count_publishers('/upperlimb/bridge/status') != 1:
             raise RuntimeError('Expected exactly one PC bridge status publisher')
-        start_left = initial['left']
-        plan, period, pre_steps = plan_for(start_left, args.delta, args.duration)
+        start = initial[side]
+        plan, period, pre_steps = plan_for(start, args.delta, args.duration)
         target = {'position_m': plan[-1]['position_m'],
                   'quaternion_xyzw': plan[-1]['quaternion_xyzw']}
         params = {'v': 0.0, 'acc': 0.0, 'time': period,
-                  'lookahead_time': 0.2, 'gain': 100, 'arm_type': 1}
-        report.update({'start_left_tcp': start_left, 'start_right_tcp': initial['right'],
-                       'target_left_tcp': target, 'plan': plan,
+                  'lookahead_time': 0.2, 'gain': 100, 'arm_type': arm_type}
+        report.update({f'start_{side}_tcp': start, f'start_{other}_tcp': initial[other],
+                       f'target_{side}_tcp': target, 'plan': plan,
                        'servo_params': params, 'planned_samples': len(plan),
                        'planned_linear_peak_m_s':
                            math.dist([0, 0, 0], args.delta[:3]) / (args.duration * (1-RAMP)),
                        'planned_angular_peak_rad_s':
-                           math.radians(quat_angle_deg(start_left['quaternion_xyzw'],
+                           math.radians(quat_angle_deg(start['quaternion_xyzw'],
                                                        target['quaternion_xyzw'])) /
                            (args.duration * (1-RAMP)),
                        'bridge_status_before': initial['status']})
@@ -396,7 +410,7 @@ def main():
             report['planned_angular_peak_rad_s'] / (args.duration * RAMP))
         print(json.dumps({key: report[key] for key in (
             'mode', 'command_topic', 'duration_s', 'delta_xyz_m_rpy_rad',
-            'start_left_tcp', 'target_left_tcp', 'start_right_tcp',
+            f'start_{side}_tcp', f'target_{side}_tcp', f'start_{other}_tcp',
             'planned_samples', 'planned_linear_peak_m_s',
             'planned_linear_peak_accel_m_s2', 'planned_angular_peak_rad_s',
             'planned_angular_peak_accel_rad_s2', 'servo_params')},
@@ -407,7 +421,7 @@ def main():
         else:
             if initial['status'].get('read_only') is not False:
                 raise RuntimeError('Control bridge is not running')
-            if node.count_publishers(COMMAND) != 0:
+            if node.count_publishers(command) != 0:
                 raise RuntimeError('Another ROS2 ServoL publisher exists')
             set_client = node.create_client(Servo, '/upperlimb/set_servo_params')
             clear_client = node.create_client(Servo, '/upperlimb/clear_servo_params')
@@ -422,29 +436,29 @@ def main():
                 feedback, reset_client, Trigger.Request())
             feedback.stopped_snapshot()
             publisher = node.create_publisher(
-                DualPose, COMMAND,
+                DualPose, command,
                 QoSProfile(depth=1, reliability=ReliabilityPolicy.RELIABLE))
             keep.append(publisher)
             end = time.monotonic() + 5.0
-            while time.monotonic() < end and node.count_subscribers(COMMAND) != 1:
+            while time.monotonic() < end and node.count_subscribers(command) != 1:
                 time.sleep(0.02)
-            if node.count_subscribers(COMMAND) != 1:
+            if node.count_subscribers(command) != 1:
                 raise RuntimeError('Expected exactly one PC bridge ServoL subscriber')
             ready = feedback.stopped_snapshot()
             status = ready['status']
             if status.get('read_only') is not False:
                 raise RuntimeError('Control bridge changed mode')
-            if status.get('ros1_command_connections', {}).get(ROS1_COMMAND) != 1:
+            if status.get('ros1_command_connections', {}).get(ros1_command) != 1:
                 raise RuntimeError('Expected exactly one real ROS1 ServoL connection')
             report['set_servo_params_message'] = call_service(
                 set_client, Servo.Request(**params), 'set_servo_params')
             configured = True
             ready = feedback.snapshot()
-            start_left = ready['left']
-            plan, period, pre_steps = plan_for(start_left, args.delta, args.duration)
-            report['start_left_tcp'] = start_left
-            report['start_right_tcp'] = ready['right']
-            report['target_left_tcp'] = {'position_m': plan[-1]['position_m'],
+            start = ready[side]
+            plan, period, pre_steps = plan_for(start, args.delta, args.duration)
+            report[f'start_{side}_tcp'] = start
+            report[f'start_{other}_tcp'] = ready[other]
+            report[f'target_{side}_tcp'] = {'position_m': plan[-1]['position_m'],
                                          'quaternion_xyzw': plan[-1]['quaternion_xyzw']}
             report['plan'] = plan
             report['bridge_status_before'] = ready['status']
@@ -452,9 +466,9 @@ def main():
             stream_start_ns = time.monotonic_ns()
             move_start_ns = stream_start_ns + pre_steps * period_ns
             report['move_start_pc_monotonic_ns'] = move_start_ns
-            print(json.dumps({'publishing_to': COMMAND,
-                              'start_left_tcp': start_left,
-                              'target_left_tcp': report['target_left_tcp'],
+            print(json.dumps({'publishing_to': command,
+                              f'start_{side}_tcp': start,
+                              f'target_{side}_tcp': report[f'target_{side}_tcp'],
                               'planned_samples': len(plan)}, indent=2), flush=True)
             for slot, row in enumerate(plan):
                 due_ns = stream_start_ns + slot * period_ns
@@ -471,8 +485,8 @@ def main():
                 if current['mode'][0] == 15 or current['mode'][1] == 'PROTECTED':
                     raise RuntimeError('Upper limb entered PROTECTED during ServoL stream')
                 message = DualPose()
-                write_pose(message.left_arm_pose, row)
-                write_pose(message.right_arm_pose, current['right'])
+                write_pose(getattr(message, f'{side}_arm_pose'), row)
+                write_pose(getattr(message, f'{other}_arm_pose'), current[other])
                 publisher.publish(message)
                 report['published'].append({
                     'pc_monotonic_ns': time.monotonic_ns(),
@@ -518,19 +532,19 @@ def main():
                                              if 'status' in feedback.latest else None)
             report['uplimb_state_after'] = (feedback.latest['mode'][0]
                                             if 'mode' in feedback.latest else None)
-            last_left = feedback.latest['left'][0] if 'left' in feedback.latest else None
+            last = feedback.latest[side][0] if side in feedback.latest else None
         if report['published'] and report['uplimb_state_after'] is not None and (
                 report['uplimb_state_after'][0] == 15 or
                 report['uplimb_state_after'][1] == 'PROTECTED'):
             report['post_run_error'] = 'Upper limb ended in PROTECTED'
             exit_code = 1
-        if report.get('target_left_tcp') and last_left and report['published']:
-            target = report['target_left_tcp']
-            report['observed_left_tcp'] = last_left
+        if report.get(f'target_{side}_tcp') and last and report['published']:
+            target = report[f'target_{side}_tcp']
+            report[f'observed_{side}_tcp'] = last
             report['final_tcp_error'] = {
-                'position_error_m': math.dist(target['position_m'], last_left['position_m']),
+                'position_error_m': math.dist(target['position_m'], last['position_m']),
                 'orientation_error_deg': quat_angle_deg(
-                    target['quaternion_xyzw'], last_left['quaternion_xyzw']),
+                    target['quaternion_xyzw'], last['quaternion_xyzw']),
             }
         if len(report['published']) > 1:
             intervals = [(b['pc_monotonic_ns']-a['pc_monotonic_ns'])/1e6
@@ -552,7 +566,7 @@ def main():
         node.destroy_node()
         rclpy.shutdown()
         try:
-            data_path, plot_path = save_result(report, stem)
+            data_path, plot_path = save_result(report, stem, side)
             print(f'Data: {data_path}\nPlot: {plot_path}')
         except Exception as exc:
             print(f'Result saving failed: {exc}; JSON path: {stem.with_suffix(".json")}')
@@ -564,6 +578,7 @@ def main():
         if report['published']:
             print('Inspect bridge/status; the next --execute will reset a latched stream fault only after STOPPED.')
     return exit_code
+
 
 
 if __name__ == '__main__':

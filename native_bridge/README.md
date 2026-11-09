@@ -123,7 +123,7 @@ ros2 topic echo --once --qos-reliability best_effort /perception/apriltag/tag0/d
 `bridge.py logs` 中的 `Passing message ... (showing msg only once per type)` 只在首次转换该消息类型时打印，不能用它判断此刻是否仍有数据。先在查询话题的**同一个终端**设置真机 domain 并加载 PC 环境：
 
 ```bash
-cd ~/WA1/WA1_ws
+cd /path/to/WA1_ws  # 替换为实际克隆目录
 export ROS_DOMAIN_ID=0
 source native_bridge/setup_pc.bash
 ros2 topic list --no-daemon -t
@@ -195,6 +195,8 @@ AprilTag ID 0 的桥接话题、坐标系、固定关节条件和 PC 订阅校�
 
 ## 测试入口与验收状态
 
+以下为完整桥链路的本机模拟回归：
+
 ```bash
 python3 native_bridge/tests/run_mock_test.py --seconds 3
 ```
@@ -220,11 +222,9 @@ source native_bridge/setup_pc.bash
 
 | 测试 | 预览命令 | 输出 |
 |---|---|---|
-| [单关节 MoveJ](tests/position_control/README.md) | `python3 native_bridge/tests/position_control/manual_shoulder_y_l.py --target 0.1` | 终端打印当前与目标关节位置；`--target` 是绝对位置。 |
-| [单关节 ServoJ](tests/position_servo/README.md) | `python3 native_bridge/tests/position_servo/manual_wrist_z_l.py --duration 1 --delta 0.01` | `tests/position_servo/results/<关节名>/` 中保存轨迹 JSON 和 PNG；`--delta` 是相对位移。 |
-| [左臂 MoveL](tests/cartesian_position/README.md) | `python3 native_bridge/tests/cartesian_position/manual_left_arm_movel.py --delta 0.005 0 0 0 0 0` | 终端打印 BASE 下的六维 TCP 目标与执行结果。 |
-| [左臂 ServoL](tests/cartesian_servo/README.md) | `python3 native_bridge/tests/cartesian_servo/manual_left_arm_servol.py --duration 1 --delta 0.005 0 0 0 0 0` | `tests/cartesian_servo/results/Left_TCP/` 中保存轨迹 JSON 和 PNG。 |
+| [单关节 MoveJ](tests/position_control/README.md) | `python3 native_bridge/tests/position_control/movej_single_joint.py --joint-name Shoulder_Y_L --target 0.1` | 终端打印当前与目标关节位置；`--target` 是绝对位置。 |
+| [单关节 ServoJ](tests/position_servo/README.md) | `python3 native_bridge/tests/position_servo/servoj_single_joint.py --joint-name Wrist_Z_L --duration 1 --delta 0.01` | `tests/position_servo/results/<关节名>/` 中保存轨迹 JSON 和 PNG；`--delta` 是相对位移。 |
+| [左臂 MoveL](tests/cartesian_position/README.md) | `python3 native_bridge/tests/cartesian_position/movel_single_arm.py --side left --delta 0.005 0 0 0 0 0` | 终端打印 BASE 下的六维 TCP 目标与执行结果。 |
+| [左臂 ServoL](tests/cartesian_servo/README.md) | `python3 native_bridge/tests/cartesian_servo/servol_single_arm.py --side left --duration 1 --delta 0.005 0 0 0 0 0` | `tests/cartesian_servo/results/Left_TCP/` 中保存轨迹 JSON 和 PNG。 |
 
-MoveL/ServoL 的六维增量依次为 `dx dy dz droll dpitch dyaw`，位置用米，角度用弧度。右臂测试使用同目录的 `manual_right_arm_movel.py`、`manual_right_arm_servol.py`；其他关节使用对应的 `manual_<joint>.py`。各目录 README 列出全部入口、参数和结果路径。`tests/manual_single_joint_movej.py` 是早期通用 MoveJ 入口；左腕延迟测量见 [延迟测试说明](tests/position_servo/latency/README.md)。
-
-第一版已完成 19 轴 MoveJ 和 ServoJ、左右臂 MoveL 和 ServoL 的真机测试，并完成左臂 FK/IK 查询。历史验收数据位于 [evidence](evidence/)。
+MoveL/ServoL 的六维增量依次为 `dx dy dz droll dpitch dyaw`，位置用米，角度用弧度。MoveL、ServoL 通过同一入口的 `--side left|right` 选择手臂；MoveJ、ServoJ 通过通用脚本的 `--joint-name` 选择关节。各目录 README 列出关节名、参数和结果路径。左腕延迟测量见 [延迟测试说明](tests/position_servo/latency/README.md)。

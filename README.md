@@ -1,6 +1,6 @@
 # WA1 PC ROS2 Humble 工作空间
 
-本工作空间主要在 Ubuntu 22.04 `x86_64` PC 上运行。它包含 WA1 上肢与灵巧手的 ROS1↔ROS2 桥、独立的 PICO4 数据接入和 PICO4 双臂遥操作；`jetson/` 另存放头部相机的本地感知代码。桥的冻结基础镜像存放在私有 GHCR；克隆源码后在本机增量构建桥镜像。机器人 Pico 运行原有 ROS1 系统。
+本工作空间主要在 Ubuntu 22.04 `x86_64` PC 上运行。它包含 WA1 上肢与灵巧手的 ROS1↔ROS2 桥、独立的 PICO4 数据接入和 PICO4 双臂遥操作；PC 端 AprilTag 订阅与校验位于 `perception/apriltag/`，机器人端相机与检测服务需另行部署。桥的冻结基础镜像存放在私有 GHCR；克隆源码后在本机增量构建桥镜像。机器人 Pico 运行原有 ROS1 系统。
 
 ## 目录
 
@@ -92,7 +92,7 @@ python3 native_bridge/bridge.py stop
 
 在另一个终端按上面的真机运行环境命令加载 `native_bridge/setup_pc.bash`，再运行 ROS2 客户端。机器人网络地址、桥接接口和测试入口见 [`native_bridge` 说明](native_bridge/README.md)。仅在 PC 上验证桥的消息转换与控制路径，可直接运行 `python3 native_bridge/tests/run_mock_test.py --seconds 3`。
 
-PICO4 独立接入和浏览器可视化见 [`pico4_ros2` 说明](src/pico4_ros2/README.md)；完整双臂遥操作的启动顺序、按键与状态查看见 [`wa1_pico4_teleop` 说明](src/wa1_pico4_teleop/README.md)。上肢保护模式与安全锁的查询、显式解锁见 [`wa1_robot_state` 说明](src/wa1_robot_state/README.md)。本地实验版与目录调整的记录见 [代码整理计划](CODE_ORGANIZATION_PLAN.md)。
+PICO4 独立接入和浏览器可视化见 [`pico4_ros2` 说明](src/pico4_ros2/README.md)；完整双臂遥操作的启动顺序、按键与状态查看见 [`wa1_pico4_teleop` 说明](src/wa1_pico4_teleop/README.md)。上肢保护模式与安全锁的查询、显式解锁见 [`wa1_robot_state` 说明](src/wa1_robot_state/README.md)。
 
 ## 本地查看头部相机
 

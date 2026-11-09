@@ -1,6 +1,6 @@
 """Shared operator-run MoveJ test for one WA1 upper-limb joint.
 
-Each manual_*.py entry point selects a fixed joint. Without --execute this
+Select a joint with --joint-name. Without --execute this
 module only reads feedback; a real MoveJ request is sent at most once.
 """
 
@@ -8,44 +8,16 @@ import argparse
 import json
 import math
 import os
+from pathlib import Path
+import sys
 import time
 
 
-# The order within each part is the WA1 MoveJ request order, not an assumed
-# index into JointState. Feedback is always mapped by joint name.
-PARTS = {
-    'left_arm': (('Shoulder_Y_L', 'Shoulder_X_L', 'Shoulder_Z_L', 'Elbow_L',
-                  'Wrist_Z_L', 'Wrist_Y_L', 'Wrist_X_L'), 1),
-    'right_arm': (('Shoulder_Y_R', 'Shoulder_X_R', 'Shoulder_Z_R', 'Elbow_R',
-                   'Wrist_Z_R', 'Wrist_Y_R', 'Wrist_X_R'), 2),
-    'neck': (('Neck_Z', 'Neck_Y'), 4),
-    'waist': (('Waist_Z', 'Waist_Y'), 8),
-    'lifting': (('Lifting_Z',), 16),
-}
+# Direct scripts and the latency entry must resolve the same test metadata.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from joint_config import PARTS, TARGET_LIMITS  # noqa: E402
 
-# Intersections of the supplied WA1 URDF bounds and the teleoperation guide's
-# example middleware bounds. These are NOT verified controller safety limits.
-TARGET_LIMITS = {
-    'Shoulder_Y_L': (-3.197, 1.145),
-    'Shoulder_X_L': (0.0, 3.026),
-    'Shoulder_Z_L': (-2.83, 2.83),
-    'Elbow_L': (-2.0, 0.07),
-    'Wrist_Z_L': (-2.855, 2.855),
-    'Wrist_Y_L': (-1.487, 1.2566),
-    'Wrist_X_L': (-1.487, 1.487),
-    'Shoulder_Y_R': (-3.197, 1.145),
-    'Shoulder_X_R': (-3.026, 0.0),
-    'Shoulder_Z_R': (-2.83, 2.83),
-    'Elbow_R': (-2.0, 0.07),
-    'Wrist_Z_R': (-2.855, 2.855),
-    'Wrist_Y_R': (-1.487, 1.2566),
-    'Wrist_X_R': (-1.487, 1.487),
-    'Neck_Z': (-0.733, 0.733),
-    'Neck_Y': (-0.1693, 0.6),
-    'Waist_Z': (-2.018, 3.0892),
-    'Waist_Y': (-0.478, 0.733),
-    'Lifting_Z': (0.002, 0.206),
-}
+
 MASTER = os.environ.get('WA1_ROS1_MASTER_URI', 'http://192.168.217.1:11311').rstrip('/')
 
 
@@ -64,24 +36,27 @@ def target_from(current, names, joint_name, absolute_target):
     return target
 
 
-def main(joint_name):
+def main(joint_name=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    if joint_name is None:
+        parser.add_argument('--joint-name', required=True, choices=tuple(TARGET_LIMITS),
+                            help='Joint to move; all other axes keep their feedback positions')
+    parser.add_argument('--target', type=float, required=True,
+                        help='Absolute joint position: rad for rotation, m for Lifting_Z')
+    parser.add_argument('--execute', action='store_true',
+                        help='Send one MoveJ request to the real robot')
+    args = parser.parse_args()
+    if joint_name is None:
+        joint_name = args.joint_name
     part, names, arm_type = part_for(joint_name)
     unit = 'm' if joint_name == 'Lifting_Z' else 'rad'
     lower, upper = TARGET_LIMITS[joint_name]
     service = f'/upperlimb/movej/{part}'
-    # Lifting_Z is prismatic. Its supplied URDF speed limit is 0.05 m/s.
     v, acc = (0.02, 0.02) if joint_name == 'Lifting_Z' else (0.2, 0.2)
     t = 0.0
     tolerance = 0.002 if joint_name == 'Lifting_Z' else 0.02
     min_delta = 0.0005 if joint_name == 'Lifting_Z' else 0.001
 
-    parser = argparse.ArgumentParser(
-        description=f'One-shot absolute MoveJ test for {joint_name}; preview by default.')
-    parser.add_argument('--target', type=float, required=True,
-                        help=f'Absolute {joint_name} position in {unit}')
-    parser.add_argument('--execute', action='store_true',
-                        help='Send one MoveJ request to the real robot')
-    args = parser.parse_args()
     if not math.isfinite(args.target) or not lower <= args.target <= upper:
         parser.error(f'--target must be finite and within [{lower}, {upper}] {unit}')
 
@@ -139,11 +114,11 @@ def main(joint_name):
     def send_once(client, current, goal):
         request = MoveJ.Request(joints=goal, v=v, acc=acc, t=t,
                                 is_async=False, arm_type=arm_type)
-        print(json.dumps({'sending_once_to': service, 'joint_name': joint_name,
-                          'current': current, 'joints': list(request.joints),
-                          'v': request.v, 'acc': request.acc, 't': request.t,
-                          'is_async': request.is_async, 'arm_type': request.arm_type},
-                         ensure_ascii=False, indent=2), flush=True)
+        sending = {'sending_once_to': service, 'joint_name': joint_name,
+                   'current': current, 'joints': list(request.joints),
+                   'v': request.v, 'acc': request.acc, 't': request.t,
+                   'is_async': request.is_async, 'arm_type': request.arm_type}
+        print(json.dumps(sending, ensure_ascii=False, indent=2), flush=True)
         future = client.call_async(request)
         rclpy.spin_until_future_complete(node, future, timeout_sec=30.0)
         if not future.done() or future.result() is None:
@@ -162,10 +137,10 @@ def main(joint_name):
         observed, _ = snapshot()
         errors = [abs(actual - expected) for actual, expected in zip(observed, goal)]
         reached = all(error <= tolerance for error in errors)
-        print(json.dumps({'observed': observed, 'goal': goal,
-                          'absolute_errors': errors, 'unit': unit,
-                          'within_tolerance': reached, 'tolerance': tolerance},
-                         ensure_ascii=False, indent=2))
+        observation = {'observed': observed, 'goal': goal,
+                       'absolute_errors': errors, 'unit': unit,
+                       'within_tolerance': reached, 'tolerance': tolerance}
+        print(json.dumps(observation, ensure_ascii=False, indent=2))
         return reached
 
     try:
@@ -174,15 +149,15 @@ def main(joint_name):
             rclpy.spin_once(node, timeout_sec=.05)
         current, status = snapshot()
         goal = target_from(current, names, joint_name, args.target)
-        print(json.dumps({'mode': 'EXECUTE' if args.execute else 'PREVIEW_ONLY',
-                          'service': service, 'part': part, 'arm_type': arm_type,
-                          'joint_name': joint_name, 'joint_names': names,
-                          'unit': unit, 'target_limits': [lower, upper],
-                          'current': current, 'target': goal,
-                          'delta': args.target - current[names.index(joint_name)],
-                          'v': v, 'acc': acc, 't': t, 'is_async': False,
-                          'bridge_read_only': status.get('read_only')},
-                         ensure_ascii=False, indent=2), flush=True)
+        preview = {'mode': 'EXECUTE' if args.execute else 'PREVIEW_ONLY',
+                   'service': service, 'part': part, 'arm_type': arm_type,
+                   'joint_name': joint_name, 'joint_names': names,
+                   'unit': unit, 'target_limits': [lower, upper],
+                   'current': current, 'target': goal,
+                   'delta': args.target - current[names.index(joint_name)],
+                   'v': v, 'acc': acc, 't': t, 'is_async': False,
+                   'bridge_read_only': status.get('read_only')}
+        print(json.dumps(preview, ensure_ascii=False, indent=2), flush=True)
         if not args.execute:
             print('Preview complete. No MoveJ service request was sent.')
             return 0
@@ -210,3 +185,7 @@ def main(joint_name):
     finally:
         node.destroy_node()
         rclpy.shutdown()
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())
